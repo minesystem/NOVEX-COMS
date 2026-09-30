@@ -1,314 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>NØV3X COMS</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
+  <title>NØV3X COMS - Dashboard</title>
 
-    body {
-      background: #09070f;
-      color: white;
-      min-height: 100vh;
-    }
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 
-    /* TOP BAR */
-    .topbar {
-      height: 65px;
-      background: #110d1d;
-      border-bottom: 1px solid #7b2cff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
-    .logo {
-      font-size: 22px;
-      font-weight: bold;
-      color: #b86cff;
-      letter-spacing: 2px;
-    }
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-    .logout {
-      background: #7b2cff;
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
+  <script src="firebase-config.js"></script>
 
-    .logout:hover {
-      background: #9b55ff;
-    }
-
-    /* LAYOUT */
-    .layout {
-      display: flex;
-      min-height: calc(100vh - 65px);
-    }
-
-    /* SIDEBAR */
-    .sidebar {
-      width: 230px;
-      background: #0d0a15;
-      border-right: 1px solid #27153d;
-      padding: 20px 12px;
-    }
-
-    .side-title {
-      color: #8e5cff;
-      font-size: 12px;
-      font-weight: bold;
-      margin: 15px 10px 8px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .nav-btn {
-      width: 100%;
-      background: transparent;
-      color: #ddd;
-      border: none;
-      text-align: left;
-      padding: 13px 12px;
-      margin-bottom: 5px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .nav-btn:hover {
-      background: #211532;
-      color: #c98aff;
-    }
-
-    .admin-btn {
-      color: #ffcc66;
-    }
-
-    /* MAIN */
-    .main {
-      flex: 1;
-      padding: 30px;
-      max-width: 1300px;
-    }
-
-    .welcome {
-      background: linear-gradient(135deg, #160d24, #24103a);
-      border: 1px solid #6e2ac2;
-      border-radius: 14px;
-      padding: 25px;
-      margin-bottom: 25px;
-    }
-
-    .welcome h1 {
-      font-size: 28px;
-      margin-bottom: 8px;
-    }
-
-    .welcome h1 span {
-      color: #b66cff;
-    }
-
-    .welcome p {
-      color: #aaa;
-    }
-
-    .section-title {
-      font-size: 18px;
-      margin: 25px 0 12px;
-      color: #c084ff;
-    }
-
-    /* CARDS */
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 15px;
-    }
-
-    .card {
-      background: #110d19;
-      border: 1px solid #2b193d;
-      border-radius: 12px;
-      padding: 20px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .card:hover {
-      transform: translateY(-3px);
-      border-color: #8a3cff;
-      background: #171021;
-    }
-
-    .card-icon {
-      font-size: 30px;
-      margin-bottom: 12px;
-    }
-
-    .card h3 {
-      margin-bottom: 7px;
-    }
-
-    .card p {
-      color: #999;
-      font-size: 13px;
-      line-height: 1.4;
-    }
-
-    /* ADMIN */
-    .admin-section {
-      display: none;
-    }
-
-    .admin-section.show {
-      display: block;
-    }
-
-    .admin-card {
-      background: #15100c;
-      border: 1px solid #77501a;
-      border-radius: 12px;
-      padding: 20px;
-      margin-top: 15px;
-    }
-
-    .admin-card h3 {
-      color: #ffca68;
-      margin-bottom: 8px;
-    }
-
-    .admin-card p {
-      color: #aaa;
-      font-size: 13px;
-    }
-
-    .status {
-      margin-top: 25px;
-      background: #0e1711;
-      border: 1px solid #245b35;
-      padding: 15px;
-      border-radius: 10px;
-      color: #75e69b;
-    }
-
-    .role {
-      display: inline-block;
-      margin-top: 12px;
-      padding: 6px 10px;
-      border-radius: 6px;
-      background: #241438;
-      color: #c88aff;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    .role.admin {
-      background: #35260d;
-      color: #ffd166;
-    }
-
-    /* MOBILE */
-    @media (max-width: 700px) {
-      .sidebar {
-        width: 70px;
-        padding: 15px 8px;
-      }
-
-      .side-title {
-        display: none;
-      }
-
-      .nav-btn {
-        font-size: 0;
-        text-align: center;
-      }
-
-      .nav-btn::first-letter {
-        font-size: 20px;
-      }
-
-      .main {
-        padding: 18px;
-      }
-
-      .welcome h1 {
-        font-size: 23px;
-      }
-    }
-  </style>
 </head>
+
 
 <body>
 
-  <!-- TOP BAR -->
-  <div class="topbar">
-    <div class="logo">NØV3X COMS</div>
 
-    <button class="logout" onclick="logout()">
-      LOGOUT
-    </button>
-  </div>
+<div class="app">
+
+
+  <!-- =========================
+       TOPBAR
+  ========================== -->
+
+  <header class="topbar">
+
+    <div class="brand">
+
+      <div class="logo">
+        N
+      </div>
+
+      <div>
+
+        <h1>NØV3X COMS</h1>
+
+        <p>PRIVATE CLAN COMMAND CENTER</p>
+
+      </div>
+
+    </div>
+
+
+    <div class="top-actions">
+
+      <span id="topUsername">
+        Loading...
+      </span>
+
+      <button
+        onclick="logout()"
+        class="logout"
+      >
+        Logout
+      </button>
+
+    </div>
+
+  </header>
+
+
 
   <div class="layout">
 
-    <!-- SIDEBAR -->
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
     <aside class="sidebar">
 
-      <div class="side-title">MAIN</div>
-
-      <button class="nav-btn" onclick="goHome()">
+      <button
+        class="nav active"
+        onclick="goHome()"
+      >
         🏠 Dashboard
       </button>
 
-      <button class="nav-btn" onclick="goChat()">
+
+      <button
+        class="nav"
+        onclick="goChat()"
+      >
         💬 Clan Chat
       </button>
 
-      <button class="nav-btn" onclick="goMembers()">
+
+      <button
+        class="nav"
+        onclick="goVoice()"
+      >
+        🔊 Clan Voice
+      </button>
+
+
+      <button
+        class="nav"
+        onclick="goMembers()"
+      >
         👥 Members
       </button>
 
 
-      <div class="side-title">CLAN</div>
-
-      <button class="nav-btn" onclick="goAnnouncements()">
+      <button
+        class="nav"
+        onclick="goAnnouncements()"
+      >
         📢 Announcements
       </button>
 
-      <button class="nav-btn" onclick="goScrimmage()">
+
+      <button
+        class="nav"
+        onclick="goScrimmage()"
+      >
         🎮 Scrimmage
       </button>
 
-      <button class="nav-btn" onclick="goTeams()">
+
+      <button
+        class="nav"
+        onclick="goTeams()"
+      >
         📋 Team / Lineup
       </button>
 
-      <button class="nav-btn" onclick="goLeaderboard()">
+
+      <button
+        class="nav"
+        onclick="goLeaderboard()"
+      >
         🏆 Leaderboard
       </button>
 
 
-      <div class="side-title">ADMIN</div>
-
       <button
         id="adminNav"
-        class="nav-btn admin-btn"
+        class="nav admin-nav"
         onclick="goAdmin()"
         style="display:none;"
       >
@@ -318,292 +157,1416 @@
     </aside>
 
 
-    <!-- MAIN CONTENT -->
-    <main class="main">
+
+    <!-- =========================
+         MAIN
+    ========================== -->
+
+    <main class="content">
+
 
       <!-- WELCOME -->
-      <div class="welcome">
 
-        <h1>
-          Welcome, <span id="username">...</span>!
-        </h1>
+      <section class="welcome">
 
-        <p>
-          Welcome to the private NØV3X clan command center.
-        </p>
+        <div>
 
-        <div id="roleBadge" class="role">
-          MEMBER
-        </div>
-
-      </div>
-
-
-      <!-- CLAN FEATURES -->
-      <div class="section-title">
-        ⚡ NØV3X COMMAND CENTER
-      </div>
-
-      <div class="cards">
-
-        <div class="card" onclick="goChat()">
-          <div class="card-icon">💬</div>
-          <h3>Clan Chat</h3>
-          <p>
-            Private communication for NØV3X members.
-          </p>
-        </div>
-
-
-        <div class="card" onclick="goMembers()">
-          <div class="card-icon">👥</div>
-          <h3>Members</h3>
-          <p>
-            View the NØV3X clan member directory.
-          </p>
-        </div>
-
-
-        <div class="card" onclick="goAnnouncements()">
-          <div class="card-icon">📢</div>
-          <h3>Announcements</h3>
-          <p>
-            Clan news, updates and important notices.
-          </p>
-        </div>
-
-
-        <div class="card" onclick="goScrimmage()">
-          <div class="card-icon">🎮</div>
-          <h3>Clan Scrimmage</h3>
-          <p>
-            Manage NØV3X scrimmage events and lineups.
-          </p>
-        </div>
-
-
-        <div class="card" onclick="goTeams()">
-          <div class="card-icon">📋</div>
-          <h3>Team / Lineup</h3>
-          <p>
-            Organize clan teams and player lineups.
-          </p>
-        </div>
-
-
-        <div class="card" onclick="goLeaderboard()">
-          <div class="card-icon">🏆</div>
-          <h3>Clan Leaderboard</h3>
-          <p>
-            Track NØV3X player and team performance.
-          </p>
-        </div>
-
-      </div>
-
-
-      <!-- ADMIN SECTION -->
-      <div id="adminSection" class="admin-section">
-
-        <div class="section-title">
-          👑 ADMIN CONTROL
-        </div>
-
-        <div class="admin-card">
-
-          <h3>Clan Administration</h3>
-
-          <p>
-            Manage NØV3X members, approvals, announcements,
-            scrimmages, teams and leaderboard data.
+          <p class="small-title">
+            NØV3X COMMAND CENTER
           </p>
 
-          <button
-            class="logout"
-            style="margin-top:15px;"
-            onclick="goAdmin()"
-          >
-            OPEN ADMIN PANEL
+          <h2>
+            Welcome,
+            <span id="welcomeUsername">
+              Member
+            </span>
+            👋
+          </h2>
+
+          <p>
+            Your private NØV3X clan communication hub.
+          </p>
+
+        </div>
+
+
+        <div class="role-box">
+
+          <span id="roleBadge">
+            MEMBER
+          </span>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- =========================
+           QUICK ACCESS
+      ========================== -->
+
+      <h2 class="section-title">
+        QUICK ACCESS
+      </h2>
+
+
+      <section class="cards">
+
+
+        <!-- CHAT -->
+
+        <div
+          class="card"
+          onclick="goChat()"
+        >
+
+          <div class="card-icon">
+            💬
+          </div>
+
+          <h3>
+            Clan Chat
+          </h3>
+
+          <p>
+            Talk privately with NØV3X members.
+          </p>
+
+          <button>
+            Open Chat →
           </button>
 
         </div>
 
-      </div>
 
 
-      <!-- STATUS -->
-      <div class="status">
-        ● NØV3X Firebase Connected
-      </div>
+        <!-- VOICE -->
+
+        <div
+          class="card voice-card"
+          onclick="goVoice()"
+        >
+
+          <div class="card-icon">
+            🔊
+          </div>
+
+          <h3>
+            Clan Voice
+          </h3>
+
+          <p>
+            Join the live private NØV3X voice room.
+          </p>
+
+          <button>
+            Join Voice →
+          </button>
+
+        </div>
+
+
+
+        <!-- MEMBERS -->
+
+        <div
+          class="card"
+          onclick="goMembers()"
+        >
+
+          <div class="card-icon">
+            👥
+          </div>
+
+          <h3>
+            Members
+          </h3>
+
+          <p>
+            View approved NØV3X clan members.
+          </p>
+
+          <button>
+            View Members →
+          </button>
+
+        </div>
+
+
+
+        <!-- ANNOUNCEMENTS -->
+
+        <div
+          class="card"
+          onclick="goAnnouncements()"
+        >
+
+          <div class="card-icon">
+            📢
+          </div>
+
+          <h3>
+            Announcements
+          </h3>
+
+          <p>
+            Check the latest clan announcements.
+          </p>
+
+          <button>
+            View News →
+          </button>
+
+        </div>
+
+
+
+        <!-- SCRIMMAGE -->
+
+        <div
+          class="card"
+          onclick="goScrimmage()"
+        >
+
+          <div class="card-icon">
+            🎮
+          </div>
+
+          <h3>
+            Scrimmage
+          </h3>
+
+          <p>
+            View upcoming NØV3X scrimmages.
+          </p>
+
+          <button>
+            Open Scrim →
+          </button>
+
+        </div>
+
+
+
+        <!-- TEAM -->
+
+        <div
+          class="card"
+          onclick="goTeams()"
+        >
+
+          <div class="card-icon">
+            📋
+          </div>
+
+          <h3>
+            Team / Lineup
+          </h3>
+
+          <p>
+            Check the current clan lineup.
+          </p>
+
+          <button>
+            View Lineup →
+          </button>
+
+        </div>
+
+
+
+        <!-- LEADERBOARD -->
+
+        <div
+          class="card"
+          onclick="goLeaderboard()"
+        >
+
+          <div class="card-icon">
+            🏆
+          </div>
+
+          <h3>
+            Leaderboard
+          </h3>
+
+          <p>
+            View the latest clan rankings.
+          </p>
+
+          <button>
+            View Rankings →
+          </button>
+
+        </div>
+
+
+      </section>
+
+
+
+      <!-- =========================
+           ADMIN
+      ========================== -->
+
+      <section
+        id="adminSection"
+        class="admin-section"
+        style="display:none;"
+      >
+
+        <div>
+
+          <span class="admin-label">
+            ADMIN ACCESS
+          </span>
+
+          <h2>
+            👑 NØV3X Administration
+          </h2>
+
+          <p>
+            Manage members, announcements,
+            scrimmages, teams and leaderboard.
+          </p>
+
+        </div>
+
+
+        <button onclick="goAdmin()">
+          Open Admin Panel →
+        </button>
+
+      </section>
+
+
+
+      <!-- =========================
+           CLAN STATUS
+      ========================== -->
+
+      <h2 class="section-title">
+        CLAN STATUS
+      </h2>
+
+
+      <section class="status-grid">
+
+
+        <div class="status-card">
+
+          <span>
+            🔐
+          </span>
+
+          <div>
+
+            <strong>
+              PRIVATE
+            </strong>
+
+            <p>
+              Clan Access
+            </p>
+
+          </div>
+
+        </div>
+
+
+
+        <div class="status-card">
+
+          <span>
+            💬
+          </span>
+
+          <div>
+
+            <strong>
+              ONLINE
+            </strong>
+
+            <p>
+              Clan Communication
+            </p>
+
+          </div>
+
+        </div>
+
+
+
+        <div class="status-card">
+
+          <span>
+            🎮
+          </span>
+
+          <div>
+
+            <strong>
+              ACTIVE
+            </strong>
+
+            <p>
+              NØV3X Community
+            </p>
+
+          </div>
+
+        </div>
+
+
+
+        <div class="status-card">
+
+          <span>
+            🔊
+          </span>
+
+          <div>
+
+            <strong>
+              VOICE
+            </strong>
+
+            <p>
+              Live Voice Available
+            </p>
+
+          </div>
+
+        </div>
+
+
+      </section>
+
 
     </main>
 
   </div>
 
-
-  <!-- FIREBASE -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
-  <script src="firebase-config.js"></script>
+</div>
 
 
-  <script>
 
-    let currentUser = null;
+<script>
 
 
-    /* AUTH CHECK */
+/* =========================
+   AUTH CHECK
+========================= */
 
-    auth.onAuthStateChanged(async function(user) {
+auth.onAuthStateChanged(
+  async function(user) {
 
-      if (!user) {
-        window.location.href = "index.html";
-        return;
-      }
+    if (!user) {
 
-      currentUser = user;
+      window.location.href =
+        "index.html";
 
-      try {
+      return;
 
-        const doc = await db
+    }
+
+
+    try {
+
+      const userDoc =
+        await db
           .collection("users")
           .doc(user.uid)
           .get();
 
-        if (!doc.exists) {
 
-          console.log("User profile not found.");
+      if (!userDoc.exists) {
 
-          window.location.href = "index.html";
+        await auth.signOut();
 
-          return;
-        }
+        window.location.href =
+          "index.html";
 
-
-        const data = doc.data();
-
-
-        /* USERNAME */
-
-        document.getElementById("username").textContent =
-          data.username || "MEMBER";
-
-
-        /* ROLE */
-
-        const role = data.role || "member";
-
-        const roleBadge =
-          document.getElementById("roleBadge");
-
-        if (role === "admin") {
-
-          roleBadge.textContent = "ADMIN";
-
-          roleBadge.classList.add("admin");
-
-
-          /* SHOW ADMIN NAV */
-
-          document.getElementById("adminNav")
-            .style.display = "block";
-
-
-          /* SHOW ADMIN SECTION */
-
-          document.getElementById("adminSection")
-            .classList.add("show");
-
-        }
-
-        else {
-
-          roleBadge.textContent = "NØV3X MEMBER";
-
-        }
+        return;
 
       }
 
-      catch (error) {
 
-        console.error(
-          "User profile error:",
-          error
-        );
+      const data =
+        userDoc.data();
+
+
+      /* =========================
+         APPROVAL CHECK
+      ========================== */
+
+      if (
+        data.approved !== true
+      ) {
+
+        window.location.href =
+          "pending.html";
+
+        return;
 
       }
+
+
+      /* =========================
+         USERNAME
+      ========================== */
+
+      const username =
+        data.username ||
+        "Member";
+
+
+      document
+        .getElementById(
+          "welcomeUsername"
+        )
+        .textContent =
+        username;
+
+
+      document
+        .getElementById(
+          "topUsername"
+        )
+        .textContent =
+        username;
+
+
+      /* =========================
+         ROLE
+      ========================== */
+
+      const role =
+        data.role ||
+        "member";
+
+
+      const roleBadge =
+        document
+          .getElementById(
+            "roleBadge"
+          );
+
+
+      roleBadge.textContent =
+        role.toUpperCase();
+
+
+      /* =========================
+         ADMIN
+      ========================== */
+
+      if (
+        role === "admin"
+      ) {
+
+        document
+          .getElementById(
+            "adminNav"
+          )
+          .style.display =
+          "block";
+
+
+        document
+          .getElementById(
+            "adminSection"
+          )
+          .style.display =
+          "flex";
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "Dashboard error:",
+        error
+      );
+
+      alert(
+        "Unable to load your account."
+      );
+
+    }
+
+  }
+);
+
+
+
+/* =========================
+   NAVIGATION
+========================= */
+
+function goHome() {
+
+  window.location.href =
+    "home.html";
+
+}
+
+
+function goChat() {
+
+  window.location.href =
+    "chat.html";
+
+}
+
+
+function goVoice() {
+
+  window.location.href =
+    "voice.html";
+
+}
+
+
+function goMembers() {
+
+  window.location.href =
+    "members.html";
+
+}
+
+
+function goAnnouncements() {
+
+  window.location.href =
+    "announcements.html";
+
+}
+
+
+function goScrimmage() {
+
+  window.location.href =
+    "scrimmage.html";
+
+}
+
+
+function goTeams() {
+
+  window.location.href =
+    "teams.html";
+
+}
+
+
+function goLeaderboard() {
+
+  window.location.href =
+    "leaderboard.html";
+
+}
+
+
+function goAdmin() {
+
+  window.location.href =
+    "admin.html";
+
+}
+
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+function logout() {
+
+  auth
+    .signOut()
+    .then(function() {
+
+      window.location.href =
+        "index.html";
+
+    })
+    .catch(function(error) {
+
+      console.error(
+        "Logout error:",
+        error
+      );
 
     });
 
+}
 
-    /* NAVIGATION */
-
-    function goHome() {
-      window.location.href = "home.html";
-    }
+</script>
 
 
-    function goChat() {
-      window.location.href = "chat.html";
-    }
+
+<style>
 
 
-    function goMembers() {
-      window.location.href = "members.html";
-    }
+* {
+
+  box-sizing: border-box;
+
+}
 
 
-    function goAnnouncements() {
-      window.location.href = "announcements.html";
-    }
+body {
+
+  margin: 0;
+
+  min-height: 100vh;
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  color: white;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      #481277 0%,
+      #170522 40%,
+      #07020c 100%
+    );
+
+}
 
 
-    function goScrimmage() {
-      window.location.href = "scrimmage.html";
-    }
+/* =========================
+   TOPBAR
+========================= */
+
+.topbar {
+
+  height: 75px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  padding:
+    0 25px;
+
+  background:
+    rgba(10, 3, 17, .95);
+
+  border-bottom:
+    1px solid #492066;
+
+  position: sticky;
+
+  top: 0;
+
+  z-index: 10;
+
+}
 
 
-    function goTeams() {
-      window.location.href = "teams.html";
-    }
+.brand {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+}
 
 
-    function goLeaderboard() {
-      window.location.href = "leaderboard.html";
-    }
+.logo {
+
+  width: 45px;
+
+  height: 45px;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #9b3cff,
+      #4b13a8
+    );
+
+  font-size: 24px;
+
+  font-weight: 900;
+
+  box-shadow:
+    0 0 20px
+    rgba(155, 60, 255, .4);
+
+}
 
 
-    function goAdmin() {
-      window.location.href = "admin.html";
-    }
+.brand h1 {
+
+  margin: 0;
+
+  font-size: 20px;
+
+  letter-spacing: 1px;
+
+}
 
 
-    /* LOGOUT */
+.brand p {
 
-    function logout() {
+  margin: 2px 0 0;
 
-      auth.signOut()
-        .then(function() {
+  font-size: 9px;
 
-          window.location.href =
-            "index.html";
+  color: #9d8ca8;
 
-        })
+  letter-spacing: 1px;
 
-        .catch(function(error) {
+}
 
-          console.error(
-            "Logout error:",
-            error
-          );
 
-        });
+.top-actions {
 
-    }
+  display: flex;
 
-  </script>
+  align-items: center;
+
+  gap: 12px;
+
+}
+
+
+#topUsername {
+
+  color: #d8b4ff;
+
+  font-weight: bold;
+
+}
+
+
+.logout {
+
+  border: 1px solid #6e2c91;
+
+  background: #260d35;
+
+  color: white;
+
+  padding: 9px 15px;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+}
+
+
+.logout:hover {
+
+  background: #43145c;
+
+}
+
+
+/* =========================
+   LAYOUT
+========================= */
+
+.layout {
+
+  display: flex;
+
+  min-height:
+    calc(100vh - 75px);
+
+}
+
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar {
+
+  width: 220px;
+
+  padding: 20px 12px;
+
+  background:
+    rgba(9, 3, 15, .9);
+
+  border-right:
+    1px solid #3e1c50;
+
+}
+
+
+.nav {
+
+  width: 100%;
+
+  border: 0;
+
+  text-align: left;
+
+  padding: 13px 15px;
+
+  margin-bottom: 7px;
+
+  border-radius: 10px;
+
+  background: transparent;
+
+  color: #a89bae;
+
+  cursor: pointer;
+
+  font-size: 14px;
+
+  transition: .2s;
+
+}
+
+
+.nav:hover {
+
+  background: #281036;
+
+  color: white;
+
+}
+
+
+.nav.active {
+
+  background:
+    linear-gradient(
+      90deg,
+      #7028a8,
+      #40135e
+    );
+
+  color: white;
+
+}
+
+
+.admin-nav {
+
+  color: #f1c76b;
+
+}
+
+
+.admin-nav:hover {
+
+  color: #ffd98a;
+
+}
+
+
+/* =========================
+   CONTENT
+========================= */
+
+.content {
+
+  flex: 1;
+
+  padding: 30px;
+
+  max-width: 1400px;
+
+}
+
+
+/* =========================
+   WELCOME
+========================= */
+
+.welcome {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  padding: 28px;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(103, 29, 151, .5),
+      rgba(24, 7, 35, .8)
+    );
+
+  border:
+    1px solid #5d2780;
+
+  margin-bottom: 30px;
+
+}
+
+
+.small-title {
+
+  margin: 0 0 8px;
+
+  color: #c17bff;
+
+  font-size: 11px;
+
+  letter-spacing: 2px;
+
+  font-weight: bold;
+
+}
+
+
+.welcome h2 {
+
+  margin: 0;
+
+  font-size: 30px;
+
+}
+
+
+.welcome h2 span {
+
+  color: #c47cff;
+
+}
+
+
+.welcome p {
+
+  color: #a99bad;
+
+  margin-bottom: 0;
+
+}
+
+
+.role-box span {
+
+  padding:
+    9px 15px;
+
+  border-radius: 20px;
+
+  background: #3c1751;
+
+  border: 1px solid #74359a;
+
+  color: #d49bff;
+
+  font-size: 12px;
+
+  font-weight: bold;
+
+}
+
+
+/* =========================
+   SECTION
+========================= */
+
+.section-title {
+
+  font-size: 17px;
+
+  margin:
+    25px 0 15px;
+
+  color: #dfb9ff;
+
+}
+
+
+/* =========================
+   CARDS
+========================= */
+
+.cards {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(220px, 1fr)
+    );
+
+  gap: 15px;
+
+}
+
+
+.card {
+
+  padding: 22px;
+
+  border-radius: 16px;
+
+  background:
+    rgba(22, 7, 31, .9);
+
+  border:
+    1px solid #3f1c50;
+
+  cursor: pointer;
+
+  transition:
+    transform .2s,
+    border .2s,
+    box-shadow .2s;
+
+}
+
+
+.card:hover {
+
+  transform:
+    translateY(-4px);
+
+  border-color:
+    #8635b4;
+
+  box-shadow:
+    0 10px 30px
+    rgba(132, 45, 179, .18);
+
+}
+
+
+.card-icon {
+
+  font-size: 30px;
+
+  margin-bottom: 12px;
+
+}
+
+
+.card h3 {
+
+  margin: 0 0 8px;
+
+}
+
+
+.card p {
+
+  min-height: 40px;
+
+  color: #918596;
+
+  font-size: 13px;
+
+  line-height: 1.5;
+
+}
+
+
+.card button {
+
+  border: 0;
+
+  background: transparent;
+
+  color: #c27aff;
+
+  padding: 0;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+}
+
+
+.voice-card {
+
+  border-color:
+    #6a2691;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(72, 18, 105, .45),
+      rgba(21, 6, 30, .95)
+    );
+
+}
+
+
+/* =========================
+   ADMIN
+========================= */
+
+.admin-section {
+
+  margin-top: 25px;
+
+  padding: 25px;
+
+  border-radius: 16px;
+
+  border:
+    1px solid #806021;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(94, 65, 14, .28),
+      rgba(26, 14, 5, .8)
+    );
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  gap: 20px;
+
+}
+
+
+.admin-label {
+
+  color: #e9bc55;
+
+  font-size: 10px;
+
+  font-weight: bold;
+
+  letter-spacing: 2px;
+
+}
+
+
+.admin-section h2 {
+
+  margin:
+    5px 0;
+
+}
+
+
+.admin-section p {
+
+  color: #a79b89;
+
+  margin: 0;
+
+}
+
+
+.admin-section button {
+
+  border: 0;
+
+  border-radius: 10px;
+
+  padding: 12px 18px;
+
+  background: #b27a1e;
+
+  color: white;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+}
+
+
+/* =========================
+   STATUS
+========================= */
+
+.status-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(200px, 1fr)
+    );
+
+  gap: 12px;
+
+}
+
+
+.status-card {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 13px;
+
+  padding: 17px;
+
+  background:
+    rgba(20, 6, 29, .9);
+
+  border:
+    1px solid #3c194b;
+
+  border-radius: 13px;
+
+}
+
+
+.status-card > span {
+
+  font-size: 25px;
+
+}
+
+
+.status-card strong {
+
+  display: block;
+
+  color: #dca6ff;
+
+  font-size: 13px;
+
+}
+
+
+.status-card p {
+
+  margin: 3px 0 0;
+
+  color: #827687;
+
+  font-size: 11px;
+
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width: 800px) {
+
+  .sidebar {
+
+    width: 70px;
+
+    padding:
+      15px 8px;
+
+  }
+
+
+  .nav {
+
+    text-align: center;
+
+    padding: 13px 5px;
+
+    font-size: 0;
+
+  }
+
+
+  .nav::first-letter {
+
+    font-size: 20px;
+
+  }
+
+
+  .content {
+
+    padding: 18px;
+
+  }
+
+
+  .brand p {
+
+    display: none;
+
+  }
+
+
+  .topbar {
+
+    padding:
+      0 12px;
+
+  }
+
+
+  #topUsername {
+
+    display: none;
+
+  }
+
+}
+
+
+@media(max-width: 550px) {
+
+  .welcome {
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 15px;
+
+  }
+
+
+  .welcome h2 {
+
+    font-size: 24px;
+
+  }
+
+
+  .admin-section {
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+  }
+
+}
+
+</style>
+
 
 </body>
-</html>
+
+  </html>
