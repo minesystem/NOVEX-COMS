@@ -4,1813 +4,428 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>NØV3X COMS - Live Voice</title>
+  <title>NØV3X COMS — Voice</title>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <script src="firebase-config.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #08000f;
+      color: white;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      padding: 18px;
+      background: #12001f;
+      border-bottom: 1px solid #7d20ff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: bold;
+      color: #b66cff;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      padding: 25px 15px;
+    }
+
+    .card {
+      background: #12001f;
+      border: 1px solid #6420a0;
+      border-radius: 18px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 25px rgba(130, 30, 255, .15);
+    }
+
+    h1 {
+      margin-top: 0;
+      color: #c078ff;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      margin-top: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #joinBtn {
+      background: #8b2cff;
+      color: white;
+    }
+
+    #leaveBtn {
+      background: #401052;
+      color: white;
+      display: none;
+    }
+
+    #muteBtn {
+      background: #6415a0;
+      color: white;
+      display: none;
+    }
+
+    .status {
+      padding: 14px;
+      border-radius: 10px;
+      background: #1c0928;
+      margin: 15px 0;
+      line-height: 1.5;
+    }
+
+    .member {
+      padding: 12px;
+      margin-top: 8px;
+      border-radius: 10px;
+      background: #1b0828;
+    }
+
+    .error {
+      color: #ff7d9c;
+      background: #280914;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+      display: none;
+      line-height: 1.5;
+    }
+
+    .back {
+      color: #c078ff;
+      text-decoration: none;
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="app">
+  <div class="topbar">
+    <div class="logo">NØV3X COMS</div>
+    <a class="back" href="home.html">← Dashboard</a>
+  </div>
 
-  <header>
+  <div class="container">
 
-    <div>
-      <h1>🔊 NØV3X VOICE</h1>
-      <p>Live Private Clan Voice</p>
+    <div class="card">
+      <h1>🔊 Clan Voice</h1>
+
+      <div id="status" class="status">
+        Checking microphone support...
+      </div>
+
+      <button id="joinBtn" onclick="joinVoice()">
+        🔊 JOIN VOICE
+      </button>
+
+      <button id="muteBtn" onclick="toggleMute()">
+        🎤 MUTE
+      </button>
+
+      <button id="leaveBtn" onclick="leaveVoice()">
+        🚪 LEAVE VOICE
+      </button>
+
+      <div id="errorBox" class="error"></div>
     </div>
 
-    <button onclick="goHome()">🏠 Dashboard</button>
-
-  </header>
-
-
-  <main>
-
-    <section class="voice-panel">
-
-      <div class="status">
-
-        <span id="statusDot"></span>
-
-        <span id="statusText">
-          Disconnected
-        </span>
-
+    <div class="card">
+      <h2>👥 In Voice</h2>
+      <div id="members">
+        Nobody is currently in voice.
       </div>
+    </div>
 
-
-      <div id="micIcon" class="mic">
-        🎙️
-      </div>
-
-
-      <h2>NØV3X LIVE VOICE</h2>
-
-      <p id="message">
-        Join the room to talk with clan members.
-      </p>
-
-
-      <div class="buttons">
-
-        <button
-          id="joinBtn"
-          class="join"
-          onclick="joinVoice()"
-        >
-          🎙️ JOIN VOICE
-        </button>
-
-
-        <button
-          id="muteBtn"
-          class="control"
-          onclick="toggleMute()"
-          disabled
-        >
-          🔇 MUTE
-        </button>
-
-
-        <button
-          id="leaveBtn"
-          class="leave"
-          onclick="leaveVoice()"
-          disabled
-        >
-          📞 LEAVE
-        </button>
-
-      </div>
-
-    </section>
-
-
-    <section class="members">
-
-      <h2>👥 VOICE MEMBERS</h2>
-
-      <div id="memberList">
-
-        <div class="empty">
-          Nobody is connected.
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <section class="audio-section">
-
-      <h2>🔊 CONNECTED AUDIO</h2>
-
-      <div id="audioContainer"></div>
-
-    </section>
-
-  </main>
-
-</div>
-
+  </div>
 
 <script>
 
-/* =========================================
-   VARIABLES
-========================================= */
-
 let currentUser = null;
-let currentUserData = null;
-
 let localStream = null;
-
 let joined = false;
 let muted = false;
 
-let peers = {};
+const statusBox = document.getElementById("status");
+const errorBox = document.getElementById("errorBox");
 
-let memberUnsubscribe = null;
+function showError(message) {
+  errorBox.style.display = "block";
+  errorBox.innerHTML = message;
+}
 
+function clearError() {
+  errorBox.style.display = "none";
+  errorBox.innerHTML = "";
+}
 
-/*
-   STUN server.
+function setStatus(message) {
+  statusBox.innerHTML = message;
+}
 
-   This helps devices discover a route
-   to each other.
-*/
+function checkMicrophoneSupport() {
 
-const rtcConfig = {
-
-  iceServers: [
-
-    {
-      urls: "stun:stun.l.google.com:19302"
-    },
-
-    {
-      urls: "stun:stun1.l.google.com:19302"
-    }
-
-  ]
-
-};
-
-
-/* =========================================
-   AUTH
-========================================= */
-
-auth.onAuthStateChanged(async function(user) {
-
-  if (!user) {
-
-    window.location.href = "index.html";
-
-    return;
-
-  }
-
-
-  currentUser = user;
-
-
-  try {
-
-    const userDoc = await db
-      .collection("users")
-      .doc(user.uid)
-      .get();
-
-
-    if (!userDoc.exists) {
-
-      window.location.href = "index.html";
-
-      return;
-
-    }
-
-
-    currentUserData = userDoc.data();
-
-
-    if (currentUserData.approved !== true) {
-
-      window.location.href = "pending.html";
-
-      return;
-
-    }
-
-
-    listenForVoiceMembers();
-
-
-  } catch (error) {
-
-    console.error(error);
-
-    showMessage(
-      "Unable to load your account."
+  if (!window.isSecureContext) {
+    setStatus("❌ This page is not using a secure connection.");
+    showError(
+      "Microphone access requires HTTPS. Open your NØV3X COMS website using its HTTPS GitHub Pages address."
     );
-
+    return false;
   }
 
-});
+  if (!navigator.mediaDevices) {
+    setStatus("❌ Microphone API unavailable.");
+    showError(
+      "Your current browser does not allow microphone access from this page. Open the site directly in Chrome."
+    );
+    return false;
+  }
 
+  if (!navigator.mediaDevices.getUserMedia) {
+    setStatus("❌ getUserMedia unavailable.");
+    showError(
+      "Your browser does not support microphone access on this page."
+    );
+    return false;
+  }
 
-/* =========================================
-   JOIN
-========================================= */
+  setStatus("✅ Microphone access is available. Press JOIN VOICE.");
+  return true;
+}
 
 async function joinVoice() {
 
-  if (joined) return;
+  clearError();
 
+  if (!checkMicrophoneSupport()) {
+    return;
+  }
 
   try {
 
-    showMessage(
-      "Requesting microphone permission..."
-    );
+    setStatus("🎤 Requesting microphone permission...");
 
-
-    localStream =
-      await navigator.mediaDevices.getUserMedia({
-
-        audio: {
-
-          echoCancellation: true,
-
-          noiseSuppression: true,
-
-          autoGainControl: true
-
-        },
-
-        video: false
-
-      });
-
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      },
+      video: false
+    });
 
     joined = true;
-    muted = false;
 
+    document.getElementById("joinBtn").style.display = "none";
+    document.getElementById("muteBtn").style.display = "block";
+    document.getElementById("leaveBtn").style.display = "block";
 
-    await db
-      .collection("voiceRoom")
+    setStatus("🟢 Microphone connected. You are in Clan Voice.");
+
+    await db.collection("voiceRoom")
       .doc(currentUser.uid)
       .set({
-
         uid: currentUser.uid,
-
-        username:
-          currentUserData.username || "Member",
-
+        username: currentUser.username,
         muted: false,
-
-        joinedAt:
-          firebase.firestore.FieldValue.serverTimestamp()
-
+        joinedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-
-
-    updateUI();
-
-
-    showMessage(
-      "Connected. Waiting for clan members..."
-    );
-
-
-    /*
-      Start watching for other members.
-    */
-
-    listenForPeers();
-
 
   } catch (error) {
 
     console.error(error);
 
+    let message = "";
 
-    if (
-      error.name === "NotAllowedError"
-    ) {
-
-      showMessage(
-        "Microphone permission was denied."
-      );
-
-    } else {
-
-      showMessage(
-        "Could not access your microphone."
-      );
-
+    if (error.name === "NotAllowedError") {
+      message =
+        "🎤 <b>Microphone permission was blocked.</b><br><br>" +
+        "Open your browser's site permissions and set Microphone to Allow, then reload this page.";
     }
 
-  }
-
-}
-
-
-/* =========================================
-   LISTEN FOR MEMBERS
-========================================= */
-
-function listenForVoiceMembers() {
-
-  memberUnsubscribe =
-    db.collection("voiceRoom")
-      .orderBy("joinedAt", "asc")
-      .onSnapshot(function(snapshot) {
-
-        const list =
-          document.getElementById(
-            "memberList"
-          );
-
-
-        list.innerHTML = "";
-
-
-        if (snapshot.empty) {
-
-          list.innerHTML = `
-            <div class="empty">
-              Nobody is connected.
-            </div>
-          `;
-
-          return;
-
-        }
-
-
-        snapshot.forEach(function(doc) {
-
-          const data = doc.data();
-
-
-          const item =
-            document.createElement("div");
-
-
-          item.className =
-            "member";
-
-
-          const icon =
-            data.muted
-              ? "🔇"
-              : "🎙️";
-
-
-          const you =
-            data.uid === currentUser.uid
-              ? " YOU"
-              : "";
-
-
-          item.innerHTML = `
-
-            <div class="member-avatar">
-              🎮
-            </div>
-
-            <div class="member-info">
-
-              <strong>
-                ${escapeHTML(
-                  data.username || "Member"
-                )}
-              </strong>
-
-              <span>
-                ${data.uid === currentUser.uid
-                  ? "You"
-                  : "NØV3X Member"}
-              </span>
-
-            </div>
-
-            <div class="member-mic">
-              ${icon}${you}
-            </div>
-
-          `;
-
-
-          list.appendChild(item);
-
-        });
-
-      });
-
-}
-
-
-/* =========================================
-   WATCH PEERS
-========================================= */
-
-function listenForPeers() {
-
-  db.collection("voiceRoom")
-    .onSnapshot(async function(snapshot) {
-
-      if (!joined) return;
-
-
-      const activeIds = [];
-
-
-      snapshot.forEach(function(doc) {
-
-        const id = doc.id;
-
-
-        if (
-          id !== currentUser.uid
-        ) {
-
-          activeIds.push(id);
-
-        }
-
-      });
-
-
-      /*
-        Remove peers that left.
-      */
-
-      for (
-        const peerId in peers
-      ) {
-
-        if (
-          !activeIds.includes(peerId)
-        ) {
-
-          closePeer(peerId);
-
-        }
-
-      }
-
-
-      /*
-        Create connections.
-
-        UID comparison determines which
-        device creates the offer.
-      */
-
-      for (
-        const peerId of activeIds
-      ) {
-
-        if (!peers[peerId]) {
-
-          if (
-            currentUser.uid < peerId
-          ) {
-
-            await createOffer(peerId);
-
-          }
-
-        }
-
-      }
-
-    });
-
-}
-
-
-/* =========================================
-   CREATE OFFER
-========================================= */
-
-async function createOffer(
-  peerId
-) {
-
-  if (peers[peerId]) return;
-
-
-  const pc =
-    createPeerConnection(
-      peerId
-    );
-
-
-  peers[peerId] = {
-
-    pc: pc,
-
-    offerCreated: true
-
-  };
-
-
-  const offer =
-    await pc.createOffer();
-
-
-  await pc.setLocalDescription(
-    offer
-  );
-
-
-  await db
-    .collection("voiceSignals")
-    .doc(peerId)
-    .collection("offers")
-    .doc(currentUser.uid)
-    .set({
-
-      type: offer.type,
-
-      sdp: offer.sdp,
-
-      from: currentUser.uid,
-
-      fromName:
-        currentUserData.username || "Member",
-
-      createdAt:
-        firebase.firestore.FieldValue.serverTimestamp()
-
-    });
-
-
-  listenForAnswer(peerId);
-
-}
-
-
-/* =========================================
-   LISTEN FOR ANSWER
-========================================= */
-
-function listenForAnswer(
-  peerId
-) {
-
-  db.collection("voiceSignals")
-    .doc(currentUser.uid)
-    .collection("answers")
-    .doc(peerId)
-    .onSnapshot(async function(doc) {
-
-      if (!doc.exists) return;
-
-      const data = doc.data();
-
-
-      const peer =
-        peers[peerId];
-
-
-      if (!peer) return;
-
-
-      if (
-        peer.pc.currentRemoteDescription
-      ) return;
-
-
-      try {
-
-        await peer.pc.setRemoteDescription({
-
-          type: data.type,
-
-          sdp: data.sdp
-
-        });
-
-      } catch (error) {
-
-        console.error(
-          "Answer error:",
-          error
-        );
-
-      }
-
-    });
-
-}
-
-
-/* =========================================
-   CHECK OFFERS
-========================================= */
-
-db.collection("voiceSignals")
-  .doc(
-    "__listener__"
-  );
-
-
-function startOfferListener() {
-
-  if (!currentUser) return;
-
-
-  return db.collection("voiceSignals")
-    .doc(currentUser.uid)
-    .collection("offers")
-    .onSnapshot(async function(snapshot) {
-
-      for (
-        const change of snapshot.docChanges()
-      ) {
-
-        if (
-          change.type !== "added"
-        ) continue;
-
-
-        const offerData =
-          change.doc.data();
-
-
-        const peerId =
-          offerData.from;
-
-
-        if (
-          peers[peerId]
-        ) continue;
-
-
-        await acceptOffer(
-          peerId,
-          offerData
-        );
-
-      }
-
-    });
-
-}
-
-
-let offerUnsubscribe = null;
-
-
-function beginOfferListener() {
-
-  if (offerUnsubscribe) return;
-
-  offerUnsubscribe =
-    startOfferListener();
-
-}
-
-
-/* =========================================
-   ACCEPT OFFER
-========================================= */
-
-async function acceptOffer(
-  peerId,
-  offerData
-) {
-
-  const pc =
-    createPeerConnection(
-      peerId
-    );
-
-
-  peers[peerId] = {
-
-    pc: pc,
-
-    offerReceived: true
-
-  };
-
-
-  try {
-
-    await pc.setRemoteDescription({
-
-      type: offerData.type,
-
-      sdp: offerData.sdp
-
-    });
-
-
-    const answer =
-      await pc.createAnswer();
-
-
-    await pc.setLocalDescription(
-      answer
-    );
-
-
-    await db
-      .collection("voiceSignals")
-      .doc(peerId)
-      .collection("answers")
-      .doc(currentUser.uid)
-      .set({
-
-        type: answer.type,
-
-        sdp: answer.sdp,
-
-        from: currentUser.uid,
-
-        createdAt:
-          firebase.firestore.FieldValue.serverTimestamp()
-
-      });
-
-
-  } catch (error) {
-
-    console.error(
-      "Offer error:",
-      error
-    );
-
-  }
-
-}
-
-
-/* =========================================
-   PEER CONNECTION
-========================================= */
-
-function createPeerConnection(
-  peerId
-) {
-
-  const pc =
-    new RTCPeerConnection(
-      rtcConfig
-    );
-
-
-  /*
-    Send microphone.
-  */
-
-  if (localStream) {
-
-    localStream
-      .getTracks()
-      .forEach(function(track) {
-
-        pc.addTrack(
-          track,
-          localStream
-        );
-
-      });
-
-  }
-
-
-  /*
-    Receive microphone.
-  */
-
-  pc.ontrack = function(event) {
-
-    const stream =
-      event.streams[0];
-
-
-    addRemoteAudio(
-      peerId,
-      stream
-    );
-
-  };
-
-
-  /*
-    ICE candidates.
-
-    Store candidates under the
-    other user's document.
-  */
-
-  pc.onicecandidate =
-    async function(event) {
-
-      if (!event.candidate) return;
-
-
-      try {
-
-        await db
-          .collection("voiceSignals")
-          .doc(peerId)
-          .collection("candidates")
-          .doc(
-            currentUser.uid
-            + "_"
-            + Date.now()
-            + "_"
-            + Math.random()
-              .toString(36)
-              .substring(2, 8)
-          )
-          .set({
-
-            from:
-              currentUser.uid,
-
-            candidate:
-              event.candidate.toJSON(),
-
-            createdAt:
-              firebase.firestore.FieldValue
-                .serverTimestamp()
-
-          });
-
-      } catch (error) {
-
-        console.error(
-          "ICE error:",
-          error
-        );
-
-      }
-
-    };
-
-
-  /*
-    Connection state.
-  */
-
-  pc.onconnectionstatechange =
-    function() {
-
-      console.log(
-        "Peer:",
-        peerId,
-        pc.connectionState
-      );
-
-      if (
-        pc.connectionState ===
-        "failed"
-      ) {
-
-        pc.restartIce();
-
-      }
-
-    };
-
-
-  listenForCandidates(
-    peerId,
-    pc
-  );
-
-
-  return pc;
-
-}
-
-
-/* =========================================
-   ICE CANDIDATES
-========================================= */
-
-function listenForCandidates(
-  peerId,
-  pc
-) {
-
-  db.collection("voiceSignals")
-    .doc(currentUser.uid)
-    .collection("candidates")
-    .where(
-      "from",
-      "==",
-      peerId
-    )
-    .onSnapshot(async function(snapshot) {
-
-      for (
-        const change of snapshot.docChanges()
-      ) {
-
-        if (
-          change.type !== "added"
-        ) continue;
-
-
-        const data =
-          change.doc.data();
-
-
-        try {
-
-          await pc.addIceCandidate(
-
-            new RTCIceCandidate(
-              data.candidate
-            )
-
-          );
-
-        } catch (error) {
-
-          console.error(
-            "Candidate error:",
-            error
-          );
-
-        }
-
-      }
-
-    });
-
-}
-
-
-/* =========================================
-   REMOTE AUDIO
-========================================= */
-
-function addRemoteAudio(
-  peerId,
-  stream
-) {
-
-  const container =
-    document.getElementById(
-      "audioContainer"
-    );
-
-
-  let audio =
-    document.getElementById(
-      "audio_" + peerId
-    );
-
-
-  if (!audio) {
-
-    audio =
-      document.createElement(
-        "audio"
-      );
-
-
-    audio.id =
-      "audio_" + peerId;
-
-
-    audio.autoplay = true;
-
-
-    audio.playsInline = true;
-
-
-    audio.controls = false;
-
-
-    container.appendChild(
-      audio
-    );
-
-  }
-
-
-  audio.srcObject =
-    stream;
-
-
-  audio.play().catch(
-    function(error) {
-
-      console.log(
-        "Audio autoplay waiting:",
-        error
-      );
-
+    else if (error.name === "SecurityError") {
+      message =
+        "🔒 <b>Security restriction.</b><br><br>" +
+        "Open the site using HTTPS and not an HTTP address.";
     }
-  );
 
+    else if (error.name === "NotFoundError") {
+      message =
+        "🎤 <b>No microphone was found.</b><br><br>" +
+        "Check that your device has a microphone available.";
+    }
+
+    else if (error.name === "NotReadableError") {
+      message =
+        "🎤 <b>The microphone is already being used.</b><br><br>" +
+        "Close another app or browser tab using the microphone and try again.";
+    }
+
+    else {
+      message =
+        "❌ <b>Microphone error:</b><br>" +
+        error.name + "<br><br>" +
+        error.message;
+    }
+
+    setStatus("❌ Microphone access failed.");
+    showError(message);
+  }
 }
-
-
-/* =========================================
-   MUTE
-========================================= */
 
 async function toggleMute() {
 
   if (!localStream) return;
 
-
   muted = !muted;
 
+  localStream.getAudioTracks().forEach(track => {
+    track.enabled = !muted;
+  });
 
-  localStream
-    .getAudioTracks()
-    .forEach(function(track) {
+  document.getElementById("muteBtn").innerHTML =
+    muted ? "🔇 UNMUTE" : "🎤 MUTE";
 
-      track.enabled =
-        !muted;
-
+  await db.collection("voiceRoom")
+    .doc(currentUser.uid)
+    .update({
+      muted: muted
     });
 
-
-  try {
-
-    await db
-      .collection("voiceRoom")
-      .doc(currentUser.uid)
-      .update({
-
-        muted: muted
-
-      });
-
-  } catch (error) {
-
-    console.error(error);
-
-  }
-
-
-  updateUI();
-
+  setStatus(
+    muted
+      ? "🔇 You are muted."
+      : "🎤 Your microphone is active."
+  );
 }
-
-
-/* =========================================
-   LEAVE
-========================================= */
 
 async function leaveVoice() {
 
-  if (!joined) return;
-
-
-  try {
-
-    await db
-      .collection("voiceRoom")
-      .doc(currentUser.uid)
-      .delete();
-
-  } catch (error) {
-
-    console.error(error);
-
-  }
-
-
-  for (
-    const peerId in peers
-  ) {
-
-    closePeer(peerId);
-
-  }
-
-
-  if (localStream) {
-
-    localStream
-      .getTracks()
-      .forEach(function(track) {
-
-        track.stop();
-
-      });
-
-    localStream = null;
-
-  }
-
-
   joined = false;
 
-  muted = false;
+  if (localStream) {
+    localStream.getTracks().forEach(track => track.stop());
+    localStream = null;
+  }
 
+  if (currentUser) {
+    await db.collection("voiceRoom")
+      .doc(currentUser.uid)
+      .delete()
+      .catch(() => {});
+  }
 
-  document
-    .getElementById(
-      "audioContainer"
-    )
-    .innerHTML = "";
+  document.getElementById("joinBtn").style.display = "block";
+  document.getElementById("muteBtn").style.display = "none";
+  document.getElementById("leaveBtn").style.display = "none";
 
-
-  updateUI();
-
-
-  showMessage(
-    "You left the voice room."
-  );
-
+  setStatus("You left Clan Voice.");
 }
 
+db.collection("voiceRoom").onSnapshot(snapshot => {
 
-/* =========================================
-   CLOSE PEER
-========================================= */
+  const members = document.getElementById("members");
 
-function closePeer(
-  peerId
-) {
+  if (snapshot.empty) {
+    members.innerHTML = "Nobody is currently in voice.";
+    return;
+  }
 
-  if (!peers[peerId]) return;
+  members.innerHTML = "";
 
+  snapshot.forEach(doc => {
+
+    const data = doc.data();
+
+    const div = document.createElement("div");
+    div.className = "member";
+
+    div.innerHTML =
+      (data.muted ? "🔇 " : "🎤 ") +
+      escapeHTML(data.username || "Member");
+
+    members.appendChild(div);
+  });
+});
+
+function escapeHTML(text) {
+
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+firebase.auth().onAuthStateChanged(async user => {
+
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  currentUser = user;
 
   try {
 
-    peers[peerId].pc.close();
+    const doc = await db
+      .collection("users")
+      .doc(user.uid)
+      .get();
+
+    if (!doc.exists || doc.data().approved !== true) {
+      window.location.href = "pending.html";
+      return;
+    }
+
+    currentUser.username =
+      doc.data().username || "Member";
+
+    checkMicrophoneSupport();
 
   } catch (error) {
 
     console.error(error);
 
+    setStatus("❌ Unable to verify your clan account.");
+  }
+});
+
+window.addEventListener("beforeunload", () => {
+
+  if (currentUser && joined) {
+
+    db.collection("voiceRoom")
+      .doc(currentUser.uid)
+      .delete()
+      .catch(() => {});
   }
 
-
-  delete peers[peerId];
-
-
-  const audio =
-    document.getElementById(
-      "audio_" + peerId
-    );
-
-
-  if (audio) {
-
-    audio.remove();
-
+  if (localStream) {
+    localStream.getTracks().forEach(track => track.stop());
   }
-
-}
-
-
-/* =========================================
-   UI
-========================================= */
-
-function updateUI() {
-
-  const join =
-    document.getElementById(
-      "joinBtn"
-    );
-
-  const mute =
-    document.getElementById(
-      "muteBtn"
-    );
-
-  const leave =
-    document.getElementById(
-      "leaveBtn"
-    );
-
-  const dot =
-    document.getElementById(
-      "statusDot"
-    );
-
-  const status =
-    document.getElementById(
-      "statusText"
-    );
-
-  const mic =
-    document.getElementById(
-      "micIcon"
-    );
-
-
-  if (joined) {
-
-    join.disabled = true;
-
-    mute.disabled = false;
-
-    leave.disabled = false;
-
-
-    if (muted) {
-
-      status.textContent =
-        "Muted";
-
-      dot.className =
-        "muted";
-
-      mute.textContent =
-        "🎙️ UNMUTE";
-
-      mic.textContent =
-        "🔇";
-
-    } else {
-
-      status.textContent =
-        "LIVE";
-
-      dot.className =
-        "live";
-
-      mute.textContent =
-        "🔇 MUTE";
-
-      mic.textContent =
-        "🎙️";
-
-    }
-
-  } else {
-
-    join.disabled = false;
-
-    mute.disabled = true;
-
-    leave.disabled = true;
-
-
-    status.textContent =
-      "Disconnected";
-
-    dot.className =
-      "offline";
-
-    mic.textContent =
-      "🎙️";
-
-  }
-
-}
-
-
-/* =========================================
-   MESSAGE
-========================================= */
-
-function showMessage(
-  message
-) {
-
-  document
-    .getElementById(
-      "message"
-    )
-    .textContent =
-    message;
-
-}
-
-
-/* =========================================
-   HOME
-========================================= */
-
-function goHome() {
-
-  leaveVoice();
-
-  window.location.href =
-    "home.html";
-
-}
-
-
-/* =========================================
-   ESCAPE
-========================================= */
-
-function escapeHTML(
-  text
-) {
-
-  return String(text)
-
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-
-    .replace(
-      /</g,
-      "&lt;"
-    )
-
-    .replace(
-      />/g,
-      "&gt;"
-    )
-
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-
-    .replace(
-      /'/g,
-      "&#039;"
-    );
-
-}
-
-
-/* =========================================
-   START SIGNALING LISTENER
-========================================= */
-
-auth.onAuthStateChanged(
-  function(user) {
-
-    if (user) {
-
-      setTimeout(
-        function() {
-
-          beginOfferListener();
-
-        },
-        1000
-      );
-
-    }
-
-  }
-);
-
-
-/* =========================================
-   CLEANUP
-========================================= */
-
-window.addEventListener(
-  "beforeunload",
-  function() {
-
-    if (localStream) {
-
-      localStream
-        .getTracks()
-        .forEach(function(track) {
-
-          track.stop();
-
-        });
-
-    }
-
-  }
-);
+});
 
 </script>
-
-
-<style>
-
-* {
-  box-sizing: border-box;
-}
-
-
-body {
-
-  margin: 0;
-
-  min-height: 100vh;
-
-  font-family: Arial, sans-serif;
-
-  color: white;
-
-  background:
-    radial-gradient(
-      circle at top,
-      #46117c,
-      #08030f 60%
-    );
-
-}
-
-
-.app {
-
-  width: 95%;
-
-  max-width: 900px;
-
-  margin: auto;
-
-  padding: 25px 0 50px;
-
-}
-
-
-header {
-
-  display: flex;
-
-  justify-content: space-between;
-
-  align-items: center;
-
-  gap: 15px;
-
-  margin-bottom: 25px;
-
-}
-
-
-header h1 {
-
-  margin: 0;
-
-  color: #dda9ff;
-
-}
-
-
-header p {
-
-  margin: 5px 0;
-
-  color: #999;
-
-}
-
-
-header button {
-
-  border: 0;
-
-  padding: 12px 18px;
-
-  border-radius: 10px;
-
-  background: #792cff;
-
-  color: white;
-
-  font-weight: bold;
-
-  cursor: pointer;
-
-}
-
-
-main {
-
-  display: grid;
-
-  gap: 20px;
-
-}
-
-
-.voice-panel,
-.members,
-.audio-section {
-
-  background:
-    rgba(20, 7, 33, .96);
-
-  border: 1px solid #5d2985;
-
-  border-radius: 20px;
-
-  padding: 28px;
-
-  box-shadow:
-    0 0 30px
-    rgba(140, 40, 255, .15);
-
-}
-
-
-.voice-panel {
-
-  text-align: center;
-
-}
-
-
-.status {
-
-  display: flex;
-
-  justify-content: center;
-
-  align-items: center;
-
-  gap: 8px;
-
-  color: #aaa;
-
-  margin-bottom: 20px;
-
-}
-
-
-#statusDot {
-
-  width: 10px;
-
-  height: 10px;
-
-  border-radius: 50%;
-
-}
-
-
-#statusDot.live {
-
-  background: #55ed8c;
-
-  box-shadow:
-    0 0 12px #55ed8c;
-
-}
-
-
-#statusDot.muted {
-
-  background: #ffb84d;
-
-}
-
-
-#statusDot.offline {
-
-  background: #777;
-
-}
-
-
-.mic {
-
-  width: 105px;
-
-  height: 105px;
-
-  margin: auto;
-
-  display: flex;
-
-  justify-content: center;
-
-  align-items: center;
-
-  border-radius: 50%;
-
-  background:
-    radial-gradient(
-      circle,
-      #923cff,
-      #321052
-    );
-
-  font-size: 45px;
-
-  box-shadow:
-    0 0 40px
-    rgba(150, 50, 255, .45);
-
-}
-
-
-.voice-panel h2 {
-
-  margin-bottom: 5px;
-
-}
-
-
-.voice-panel p {
-
-  color: #999;
-
-}
-
-
-.buttons {
-
-  display: flex;
-
-  justify-content: center;
-
-  flex-wrap: wrap;
-
-  gap: 10px;
-
-  margin-top: 25px;
-
-}
-
-
-.buttons button {
-
-  border: 0;
-
-  padding: 13px 20px;
-
-  border-radius: 10px;
-
-  color: white;
-
-  font-weight: bold;
-
-  cursor: pointer;
-
-}
-
-
-.buttons button:disabled {
-
-  opacity: .4;
-
-  cursor: not-allowed;
-
-}
-
-
-.join {
-
-  background: #7c2cff;
-
-}
-
-
-.control {
-
-  background: #442054;
-
-}
-
-
-.leave {
-
-  background: #a5224e;
-
-}
-
-
-.members h2,
-.audio-section h2 {
-
-  margin-top: 0;
-
-  color: #dda9ff;
-
-}
-
-
-.member {
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 12px;
-
-  padding: 13px;
-
-  margin: 9px 0;
-
-  border-radius: 12px;
-
-  background:
-    rgba(55, 20, 78, .65);
-
-  border: 1px solid #47205e;
-
-}
-
-
-.member-avatar {
-
-  width: 42px;
-
-  height: 42px;
-
-  display: flex;
-
-  justify-content: center;
-
-  align-items: center;
-
-  border-radius: 50%;
-
-  background: #35105e;
-
-}
-
-
-.member-info {
-
-  flex: 1;
-
-}
-
-
-.member-info strong {
-
-  display: block;
-
-}
-
-
-.member-info span {
-
-  color: #999;
-
-  font-size: 12px;
-
-}
-
-
-.member-mic {
-
-  color: #d99cff;
-
-}
-
-
-.empty {
-
-  text-align: center;
-
-  padding: 25px;
-
-  color: #888;
-
-}
-
-
-#audioContainer audio {
-
-  display: none;
-
-}
-
-
-@media(max-width:600px) {
-
-  header {
-
-    flex-direction: column;
-
-    align-items: stretch;
-
-  }
-
-  header button {
-
-    width: 100%;
-
-  }
-
-  .voice-panel,
-  .members,
-  .audio-section {
-
-    padding: 20px;
-
-  }
-
-}
-
-</style>
 
 </body>
 </html>
