@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>NØV3X Announcements</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #09070f;
+      color: white;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      height: 65px;
+      background: #110d1d;
+      border-bottom: 1px solid #7b2cff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+
+    .logo {
+      color: #bd75ff;
+      font-size: 21px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    .back {
+      background: #251536;
+      color: white;
+      border: 1px solid #7130a8;
+      padding: 9px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .main {
+      max-width: 1000px;
+      margin: auto;
+      padding: 25px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #160d24, #28103e);
+      border: 1px solid #722fc2;
+      border-radius: 14px;
+      padding: 25px;
+      margin-bottom: 25px;
+    }
+
+    .header h1 {
+      color: #c37cff;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: #999;
+    }
+
+    .announcement {
+      background: #110d19;
+      border: 1px solid #2b193d;
+      border-left: 4px solid #8a3cff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+    }
+
+    .announcement h2 {
+      color: #d09aff;
+      margin-bottom: 10px;
+    }
+
+    .announcement-text {
+      color: #ccc;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .date {
+      color: #777;
+      font-size: 12px;
+      margin-top: 15px;
+    }
+
+    .empty {
+      text-align: center;
+      background: #110d19;
+      border: 1px solid #2b193d;
+      border-radius: 12px;
+      padding: 40px 20px;
+      color: #777;
+    }
+
+    .loading {
+      text-align: center;
+      color: #999;
+      padding: 30px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="topbar">
+
+    <div class="logo">
+      NØV3X COMS
+    </div>
+
+    <button class="back" onclick="goHome()">
+      ← DASHBOARD
+    </button>
+
+  </div>
+
+
+  <main class="main">
+
+    <div class="header">
+
+      <h1>📢 CLAN ANNOUNCEMENTS</h1>
+
+      <p>
+        Official announcements from the NØV3X administration.
+      </p>
+
+    </div>
+
+
+    <div id="announcements" class="loading">
+      Loading announcements...
+    </div>
+
+  </main>
+
+
+  <!-- FIREBASE -->
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <script src="firebase-config.js"></script>
+
+
+  <script>
+
+    /* =========================
+       AUTH CHECK
+    ========================= */
+
+    auth.onAuthStateChanged(async function(user) {
+
+      if (!user) {
+
+        window.location.href = "index.html";
+
+        return;
+
+      }
+
+
+      try {
+
+        const userDoc =
+          await db
+            .collection("users")
+            .doc(user.uid)
+            .get();
+
+
+        if (!userDoc.exists) {
+
+          await auth.signOut();
+
+          window.location.href =
+            "index.html";
+
+          return;
+
+        }
+
+
+        const data =
+          userDoc.data();
+
+
+        if (data.approved !== true) {
+
+          window.location.href =
+            "pending.html";
+
+          return;
+
+        }
+
+
+        loadAnnouncements();
+
+      }
+
+      catch (error) {
+
+        console.error(
+          "Auth error:",
+          error
+        );
+
+      }
+
+    });
+
+
+    /* =========================
+       LOAD ANNOUNCEMENTS
+    ========================= */
+
+    function loadAnnouncements() {
+
+      db.collection("announcements")
+        .orderBy("createdAt", "desc")
+        .limit(50)
+        .onSnapshot(
+
+          function(snapshot) {
+
+            const container =
+              document.getElementById("announcements");
+
+            container.innerHTML = "";
+
+
+            if (snapshot.empty) {
+
+              container.innerHTML = `
+                <div class="empty">
+                  📢<br><br>
+                  No clan announcements yet.
+                </div>
+              `;
+
+              return;
+
+            }
+
+
+            snapshot.forEach(function(doc) {
+
+              const data =
+                doc.data();
+
+
+              let date =
+                "Recently posted";
+
+
+              if (data.createdAt) {
+
+                date =
+                  data.createdAt
+                    .toDate()
+                    .toLocaleString();
+
+              }
+
+
+              const div =
+                document.createElement("div");
+
+              div.className =
+                "announcement";
+
+
+              const title =
+                escapeHTML(
+                  data.title || "NØV3X Announcement"
+                );
+
+
+              const text =
+                escapeHTML(
+                  data.text || ""
+                );
+
+
+              div.innerHTML = `
+
+                <h2>
+                  ${title}
+                </h2>
+
+                <div class="announcement-text">
+                  ${text}
+                </div>
+
+                <div class="date">
+                  📅 ${date}
+                </div>
+
+              `;
+
+
+              container.appendChild(div);
+
+            });
+
+          },
+
+          function(error) {
+
+            console.error(error);
+
+            document.getElementById(
+              "announcements"
+            ).innerHTML = `
+
+              <div class="empty">
+                Unable to load announcements.
+              </div>
+
+            `;
+
+          }
+
+        );
+
+    }
+
+
+    /* =========================
+       HTML SECURITY
+    ========================= */
+
+    function escapeHTML(text) {
+
+      const div =
+        document.createElement("div");
+
+      div.textContent = text;
+
+      return div.innerHTML;
+
+    }
+
+
+    /* =========================
+       DASHBOARD
+    ========================= */
+
+    function goHome() {
+
+      window.location.href =
+        "home.html";
+
+    }
+
+  </script>
+
+</body>
+  </html>
