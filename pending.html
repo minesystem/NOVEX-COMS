@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>NØV3X - Pending Approval</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #09070f;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .box {
+      width: 100%;
+      max-width: 450px;
+      text-align: center;
+      background: #110d19;
+      border: 1px solid #652aa0;
+      border-radius: 16px;
+      padding: 35px 25px;
+      box-shadow: 0 0 35px rgba(123, 44, 255, 0.15);
+    }
+
+    .logo {
+      color: #c077ff;
+      font-size: 27px;
+      font-weight: bold;
+      letter-spacing: 3px;
+      margin-bottom: 25px;
+    }
+
+    .icon {
+      font-size: 55px;
+      margin-bottom: 15px;
+    }
+
+    h1 {
+      color: #c47cff;
+      margin-bottom: 12px;
+    }
+
+    p {
+      color: #999;
+      line-height: 1.6;
+    }
+
+    .status {
+      margin: 25px 0;
+      padding: 15px;
+      border-radius: 10px;
+      background: #211707;
+      border: 1px solid #745019;
+      color: #ffd166;
+      font-weight: bold;
+    }
+
+    .logout {
+      background: #7b2cff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .logout:hover {
+      background: #994fff;
+    }
+
+    .small {
+      color: #666;
+      font-size: 12px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="box">
+
+    <div class="logo">
+      NØV3X COMS
+    </div>
+
+    <div class="icon">
+      ⏳
+    </div>
+
+    <h1>Approval Pending</h1>
+
+    <p>
+      Your request to join the private NØV3X clan
+      has been received.
+    </p>
+
+    <div class="status">
+      ● WAITING FOR ADMIN APPROVAL
+    </div>
+
+    <p>
+      An NØV3X admin needs to approve your account
+      before you can access the clan dashboard.
+    </p>
+
+    <button
+      class="logout"
+      onclick="logout()"
+      style="margin-top:25px;"
+    >
+      LOGOUT
+    </button>
+
+    <div class="small">
+      NØV3X PRIVATE CLAN SYSTEM
+    </div>
+
+  </div>
+
+
+  <!-- FIREBASE -->
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <script src="firebase-config.js"></script>
+
+
+  <script>
+
+    auth.onAuthStateChanged(async function(user) {
+
+      if (!user) {
+
+        window.location.href = "index.html";
+
+        return;
+
+      }
+
+
+      try {
+
+        const doc =
+          await db
+            .collection("users")
+            .doc(user.uid)
+            .get();
+
+
+        if (!doc.exists) {
+
+          await auth.signOut();
+
+          window.location.href =
+            "index.html";
+
+          return;
+
+        }
+
+
+        const data = doc.data();
+
+
+        /*
+          If admin or approved member,
+          send them to the dashboard.
+        */
+
+        if (
+          data.approved === true
+        ) {
+
+          window.location.href =
+            "home.html";
+
+        }
+
+      }
+
+      catch (error) {
+
+        console.error(
+          "Approval check error:",
+          error
+        );
+
+      }
+
+    });
+
+
+    function logout() {
+
+      auth.signOut()
+        .then(function() {
+
+          window.location.href =
+            "index.html";
+
+        });
+
+    }
+
+  </script>
+
+</body>
+  </html>
