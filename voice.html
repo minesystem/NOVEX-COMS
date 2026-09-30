@@ -1,230 +1,236 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NØV3X COMS — Clan Voice</title>
 
-  <title>NØV3X COMS — Voice</title>
+<style>
+* {
+  box-sizing: border-box;
+}
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #090014;
+  color: white;
+}
 
-  <script src="firebase-config.js"></script>
+header {
+  padding: 18px;
+  background: #140021;
+  border-bottom: 1px solid #7b2cff;
+}
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+.logo {
+  font-size: 22px;
+  font-weight: bold;
+  color: #b96cff;
+}
 
-    body {
-      margin: 0;
-      background: #08000f;
-      color: white;
-      font-family: Arial, sans-serif;
-      min-height: 100vh;
-    }
+.back {
+  display: inline-block;
+  margin-top: 8px;
+  color: #aaa;
+  text-decoration: none;
+}
 
-    .topbar {
-      padding: 18px;
-      background: #12001f;
-      border-bottom: 1px solid #7d20ff;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+.container {
+  max-width: 700px;
+  margin: auto;
+  padding: 20px;
+}
 
-    .logo {
-      font-size: 22px;
-      font-weight: bold;
-      color: #b66cff;
-    }
+.voice-box {
+  background: #12001e;
+  border: 1px solid #6522a8;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 0 25px rgba(130, 40, 255, .15);
+}
 
-    .container {
-      max-width: 700px;
-      margin: auto;
-      padding: 25px 15px;
-    }
+h1 {
+  margin-top: 0;
+}
 
-    .card {
-      background: #12001f;
-      border: 1px solid #6420a0;
-      border-radius: 18px;
-      padding: 25px;
-      margin-bottom: 20px;
-      box-shadow: 0 0 25px rgba(130, 30, 255, .15);
-    }
+.status {
+  padding: 12px;
+  border-radius: 10px;
+  background: #1b0730;
+  margin-bottom: 15px;
+}
 
-    h1 {
-      margin-top: 0;
-      color: #c078ff;
-    }
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 10px;
+  border: 0;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-    button {
-      width: 100%;
-      padding: 15px;
-      border: none;
-      border-radius: 12px;
-      margin-top: 10px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+.join {
+  background: #8b2cff;
+  color: white;
+}
 
-    #joinBtn {
-      background: #8b2cff;
-      color: white;
-    }
+.mute {
+  background: #29202f;
+  color: white;
+}
 
-    #leaveBtn {
-      background: #401052;
-      color: white;
-      display: none;
-    }
+.leave {
+  background: #b32626;
+  color: white;
+}
 
-    #muteBtn {
-      background: #6415a0;
-      color: white;
-      display: none;
-    }
+button:disabled {
+  opacity: .5;
+}
 
-    .status {
-      padding: 14px;
-      border-radius: 10px;
-      background: #1c0928;
-      margin: 15px 0;
-      line-height: 1.5;
-    }
+.members {
+  margin-top: 20px;
+}
 
-    .member {
-      padding: 12px;
-      margin-top: 8px;
-      border-radius: 10px;
-      background: #1b0828;
-    }
+.member {
+  padding: 13px;
+  margin-top: 8px;
+  background: #1b0829;
+  border-radius: 10px;
+  border: 1px solid #352044;
+}
 
-    .error {
-      color: #ff7d9c;
-      background: #280914;
-      padding: 15px;
-      border-radius: 10px;
-      margin-top: 15px;
-      display: none;
-      line-height: 1.5;
-    }
-
-    .back {
-      color: #c078ff;
-      text-decoration: none;
-    }
-  </style>
+.audio-container audio {
+  display: none;
+}
+</style>
 </head>
 
 <body>
 
-  <div class="topbar">
-    <div class="logo">NØV3X COMS</div>
-    <a class="back" href="home.html">← Dashboard</a>
-  </div>
+<header>
+  <div class="logo">NØV3X COMS</div>
+  <a class="back" href="home.html">← Dashboard</a>
+</header>
 
-  <div class="container">
+<div class="container">
 
-    <div class="card">
-      <h1>🔊 Clan Voice</h1>
+  <div class="voice-box">
 
-      <div id="status" class="status">
-        Checking microphone support...
-      </div>
+    <h1>🔊 Clan Voice</h1>
 
-      <button id="joinBtn" onclick="joinVoice()">
-        🔊 JOIN VOICE
-      </button>
-
-      <button id="muteBtn" onclick="toggleMute()">
-        🎤 MUTE
-      </button>
-
-      <button id="leaveBtn" onclick="leaveVoice()">
-        🚪 LEAVE VOICE
-      </button>
-
-      <div id="errorBox" class="error"></div>
+    <div id="status" class="status">
+      🔴 Not connected
     </div>
 
-    <div class="card">
-      <h2>👥 In Voice</h2>
-      <div id="members">
+    <button id="joinBtn" class="join">
+      🔊 JOIN VOICE
+    </button>
+
+    <button id="muteBtn" class="mute" disabled>
+      🎤 MUTE
+    </button>
+
+    <button id="leaveBtn" class="leave" disabled>
+      🚪 LEAVE VOICE
+    </button>
+
+    <div class="members">
+      <h3>👥 In Voice</h3>
+      <div id="memberList">
         Nobody is currently in voice.
       </div>
     </div>
 
+    <div id="audioContainer" class="audio-container"></div>
+
   </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script src="firebase-config.js"></script>
 
 <script>
 
+const statusBox = document.getElementById("status");
+const joinBtn = document.getElementById("joinBtn");
+const muteBtn = document.getElementById("muteBtn");
+const leaveBtn = document.getElementById("leaveBtn");
+const memberList = document.getElementById("memberList");
+const audioContainer = document.getElementById("audioContainer");
+
 let currentUser = null;
+let username = "";
+
 let localStream = null;
 let joined = false;
 let muted = false;
 
-const statusBox = document.getElementById("status");
-const errorBox = document.getElementById("errorBox");
+let sessionId = crypto.randomUUID();
 
-function showError(message) {
-  errorBox.style.display = "block";
-  errorBox.innerHTML = message;
-}
+const peers = {};
+const pendingCandidates = {};
+const seenSignals = new Set();
 
-function clearError() {
-  errorBox.style.display = "none";
-  errorBox.innerHTML = "";
-}
+const rtcConfig = {
+  iceServers: [
+    {
+      urls: "stun:stun.l.google.com:19302"
+    },
+    {
+      urls: "stun:stun1.l.google.com:19302"
+    }
+  ]
+};
 
-function setStatus(message) {
-  statusBox.innerHTML = message;
-}
 
-function checkMicrophoneSupport() {
+/* =========================
+   AUTH CHECK
+========================= */
 
-  if (!window.isSecureContext) {
-    setStatus("❌ This page is not using a secure connection.");
-    showError(
-      "Microphone access requires HTTPS. Open your NØV3X COMS website using its HTTPS GitHub Pages address."
-    );
-    return false;
-  }
+auth.onAuthStateChanged(async user => {
 
-  if (!navigator.mediaDevices) {
-    setStatus("❌ Microphone API unavailable.");
-    showError(
-      "Your current browser does not allow microphone access from this page. Open the site directly in Chrome."
-    );
-    return false;
-  }
-
-  if (!navigator.mediaDevices.getUserMedia) {
-    setStatus("❌ getUserMedia unavailable.");
-    showError(
-      "Your browser does not support microphone access on this page."
-    );
-    return false;
-  }
-
-  setStatus("✅ Microphone access is available. Press JOIN VOICE.");
-  return true;
-}
-
-async function joinVoice() {
-
-  clearError();
-
-  if (!checkMicrophoneSupport()) {
+  if (!user) {
+    window.location.href = "index.html";
     return;
   }
 
+  currentUser = user;
+
+  const doc = await db
+    .collection("users")
+    .doc(user.uid)
+    .get();
+
+  if (!doc.exists || doc.data().approved !== true) {
+    await auth.signOut();
+    window.location.href = "index.html";
+    return;
+  }
+
+  username = doc.data().username || "Member";
+
+});
+
+
+/* =========================
+   JOIN VOICE
+========================= */
+
+joinBtn.onclick = async () => {
+
+  if (joined) return;
+
   try {
 
-    setStatus("🎤 Requesting microphone permission...");
+    statusBox.innerHTML = "🎤 Requesting microphone...";
 
     localStream = await navigator.mediaDevices.getUserMedia({
       audio: {
@@ -237,74 +243,460 @@ async function joinVoice() {
 
     joined = true;
 
-    document.getElementById("joinBtn").style.display = "none";
-    document.getElementById("muteBtn").style.display = "block";
-    document.getElementById("leaveBtn").style.display = "block";
-
-    setStatus("🟢 Microphone connected. You are in Clan Voice.");
-
-    await db.collection("voiceRoom")
+    await db
+      .collection("voiceRoom")
       .doc(currentUser.uid)
       .set({
         uid: currentUser.uid,
-        username: currentUser.username,
+        username: username,
+        sessionId: sessionId,
         muted: false,
         joinedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
+
+    joinBtn.disabled = true;
+    muteBtn.disabled = false;
+    leaveBtn.disabled = false;
+
+    statusBox.innerHTML =
+      "🟢 Connected to NØV3X Clan Voice";
+
+    listenForMembers();
+    listenForSignals();
 
   } catch (error) {
 
     console.error(error);
 
-    let message = "";
-
-    if (error.name === "NotAllowedError") {
-      message =
-        "🎤 <b>Microphone permission was blocked.</b><br><br>" +
-        "Open your browser's site permissions and set Microphone to Allow, then reload this page.";
-    }
-
-    else if (error.name === "SecurityError") {
-      message =
-        "🔒 <b>Security restriction.</b><br><br>" +
-        "Open the site using HTTPS and not an HTTP address.";
-    }
-
-    else if (error.name === "NotFoundError") {
-      message =
-        "🎤 <b>No microphone was found.</b><br><br>" +
-        "Check that your device has a microphone available.";
-    }
-
-    else if (error.name === "NotReadableError") {
-      message =
-        "🎤 <b>The microphone is already being used.</b><br><br>" +
-        "Close another app or browser tab using the microphone and try again.";
-    }
-
-    else {
-      message =
-        "❌ <b>Microphone error:</b><br>" +
-        error.name + "<br><br>" +
-        error.message;
-    }
-
-    setStatus("❌ Microphone access failed.");
-    showError(message);
+    statusBox.innerHTML =
+      "❌ Microphone connection failed: " +
+      error.message;
   }
+};
+
+
+/* =========================
+   MEMBER LIST
+========================= */
+
+function listenForMembers() {
+
+  db.collection("voiceRoom")
+    .onSnapshot(snapshot => {
+
+      const members = [];
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+
+        if (data.uid !== currentUser.uid) {
+          members.push(data);
+        }
+      });
+
+      if (members.length === 0) {
+
+        memberList.innerHTML =
+          "Nobody else is currently in voice.";
+
+      } else {
+
+        memberList.innerHTML = members.map(member => {
+
+          return `
+            <div class="member">
+              🎤 ${escapeHtml(member.username)}
+            </div>
+          `;
+
+        }).join("");
+
+      }
+
+      /*
+       Create connections with every other
+       member currently inside the room.
+      */
+
+      members.forEach(member => {
+
+        if (!peers[member.uid]) {
+
+          const shouldCall =
+            currentUser.uid < member.uid;
+
+          if (shouldCall) {
+            createOffer(member);
+          }
+        }
+
+      });
+
+    });
+
 }
 
-async function toggleMute() {
+
+/* =========================
+   CREATE PEER
+========================= */
+
+function createPeer(member) {
+
+  if (peers[member.uid]) {
+    return peers[member.uid];
+  }
+
+  const pc = new RTCPeerConnection(rtcConfig);
+
+  peers[member.uid] = pc;
+
+  pendingCandidates[member.uid] =
+    pendingCandidates[member.uid] || [];
+
+
+  /* Local audio */
+
+  if (localStream) {
+
+    localStream.getTracks().forEach(track => {
+
+      pc.addTrack(track, localStream);
+
+    });
+
+  }
+
+
+  /* Remote audio */
+
+  pc.ontrack = event => {
+
+    let audio =
+      document.getElementById("audio-" + member.uid);
+
+    if (!audio) {
+
+      audio = document.createElement("audio");
+
+      audio.id = "audio-" + member.uid;
+
+      audio.autoplay = true;
+      audio.playsInline = true;
+
+      audioContainer.appendChild(audio);
+    }
+
+    audio.srcObject = event.streams[0];
+
+    audio.play().catch(() => {});
+  };
+
+
+  /* ICE candidates */
+
+  pc.onicecandidate = async event => {
+
+    if (!event.candidate) return;
+
+    await db.collection("voiceSignals").add({
+
+      roomId: "main",
+
+      from: currentUser.uid,
+      to: member.uid,
+
+      type: "candidate",
+
+      candidate: event.candidate.toJSON(),
+
+      sessionId: sessionId,
+
+      createdAt:
+        firebase.firestore.FieldValue.serverTimestamp()
+
+    });
+
+  };
+
+
+  pc.onconnectionstatechange = () => {
+
+    console.log(
+      "Voice connection:",
+      member.username,
+      pc.connectionState
+    );
+
+  };
+
+
+  return pc;
+}
+
+
+/* =========================
+   CREATE OFFER
+========================= */
+
+async function createOffer(member) {
+
+  try {
+
+    const pc = createPeer(member);
+
+    if (pc.signalingState !== "stable") {
+      return;
+    }
+
+    const offer = await pc.createOffer();
+
+    await pc.setLocalDescription(offer);
+
+    await db.collection("voiceSignals").add({
+
+      roomId: "main",
+
+      from: currentUser.uid,
+      to: member.uid,
+
+      type: "offer",
+
+      sdp: {
+        type: offer.type,
+        sdp: offer.sdp
+      },
+
+      sessionId: sessionId,
+
+      createdAt:
+        firebase.firestore.FieldValue.serverTimestamp()
+
+    });
+
+  } catch (error) {
+
+    console.error(
+      "Offer error:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================
+   SIGNAL LISTENER
+========================= */
+
+function listenForSignals() {
+
+  db.collection("voiceSignals")
+    .where("to", "==", currentUser.uid)
+    .onSnapshot(async snapshot => {
+
+      for (const change of snapshot.docChanges()) {
+
+        if (change.type !== "added") {
+          continue;
+        }
+
+        const signalId = change.doc.id;
+
+        if (seenSignals.has(signalId)) {
+          continue;
+        }
+
+        seenSignals.add(signalId);
+
+        const signal = change.doc.data();
+
+        if (signal.roomId !== "main") {
+          continue;
+        }
+
+        await handleSignal(signal);
+      }
+
+    });
+
+}
+
+
+/* =========================
+   HANDLE SIGNAL
+========================= */
+
+async function handleSignal(signal) {
+
+  if (!joined) return;
+
+  const sender = signal.from;
+
+  /*
+   Ignore our own old session signals.
+  */
+
+  if (!sender || sender === currentUser.uid) {
+    return;
+  }
+
+  try {
+
+    let memberData = {
+      uid: sender,
+      username: "NØV3X Member"
+    };
+
+    const memberDoc =
+      await db.collection("voiceRoom")
+        .doc(sender)
+        .get();
+
+    if (memberDoc.exists) {
+      memberData = memberDoc.data();
+    }
+
+    const pc = createPeer(memberData);
+
+
+    /* OFFER */
+
+    if (signal.type === "offer") {
+
+      await pc.setRemoteDescription(
+        new RTCSessionDescription(signal.sdp)
+      );
+
+      const answer =
+        await pc.createAnswer();
+
+      await pc.setLocalDescription(answer);
+
+      await db.collection("voiceSignals").add({
+
+        roomId: "main",
+
+        from: currentUser.uid,
+        to: sender,
+
+        type: "answer",
+
+        sdp: {
+          type: answer.type,
+          sdp: answer.sdp
+        },
+
+        sessionId: sessionId,
+
+        createdAt:
+          firebase.firestore.FieldValue.serverTimestamp()
+
+      });
+
+      await flushCandidates(sender);
+
+    }
+
+
+    /* ANSWER */
+
+    else if (signal.type === "answer") {
+
+      await pc.setRemoteDescription(
+        new RTCSessionDescription(signal.sdp)
+      );
+
+      await flushCandidates(sender);
+
+    }
+
+
+    /* ICE CANDIDATE */
+
+    else if (signal.type === "candidate") {
+
+      const candidate =
+        new RTCIceCandidate(signal.candidate);
+
+      if (pc.remoteDescription) {
+
+        await pc.addIceCandidate(candidate);
+
+      } else {
+
+        pendingCandidates[sender].push(candidate);
+
+      }
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Signal error:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================
+   FLUSH ICE
+========================= */
+
+async function flushCandidates(uid) {
+
+  const pc = peers[uid];
+
+  if (!pc) return;
+
+  const queue =
+    pendingCandidates[uid] || [];
+
+  while (queue.length) {
+
+    const candidate =
+      queue.shift();
+
+    try {
+
+      await pc.addIceCandidate(candidate);
+
+    } catch (error) {
+
+      console.error(
+        "ICE error:",
+        error
+      );
+
+    }
+
+  }
+
+}
+
+
+/* =========================
+   MUTE
+========================= */
+
+muteBtn.onclick = async () => {
 
   if (!localStream) return;
 
   muted = !muted;
 
-  localStream.getAudioTracks().forEach(track => {
-    track.enabled = !muted;
-  });
+  localStream
+    .getAudioTracks()
+    .forEach(track => {
+      track.enabled = !muted;
+    });
 
-  document.getElementById("muteBtn").innerHTML =
+  muteBtn.innerHTML =
     muted ? "🔇 UNMUTE" : "🎤 MUTE";
 
   await db.collection("voiceRoom")
@@ -313,117 +705,120 @@ async function toggleMute() {
       muted: muted
     });
 
-  setStatus(
-    muted
-      ? "🔇 You are muted."
-      : "🎤 Your microphone is active."
-  );
-}
+};
+
+
+/* =========================
+   LEAVE
+========================= */
+
+leaveBtn.onclick = async () => {
+
+  await leaveVoice();
+
+};
+
 
 async function leaveVoice() {
 
   joined = false;
 
   if (localStream) {
-    localStream.getTracks().forEach(track => track.stop());
+
+    localStream.getTracks().forEach(track => {
+      track.stop();
+    });
+
     localStream = null;
   }
 
-  if (currentUser) {
-    await db.collection("voiceRoom")
-      .doc(currentUser.uid)
-      .delete()
-      .catch(() => {});
-  }
 
-  document.getElementById("joinBtn").style.display = "block";
-  document.getElementById("muteBtn").style.display = "none";
-  document.getElementById("leaveBtn").style.display = "none";
+  Object.values(peers).forEach(pc => {
 
-  setStatus("You left Clan Voice.");
-}
+    try {
+      pc.close();
+    } catch (e) {}
 
-db.collection("voiceRoom").onSnapshot(snapshot => {
-
-  const members = document.getElementById("members");
-
-  if (snapshot.empty) {
-    members.innerHTML = "Nobody is currently in voice.";
-    return;
-  }
-
-  members.innerHTML = "";
-
-  snapshot.forEach(doc => {
-
-    const data = doc.data();
-
-    const div = document.createElement("div");
-    div.className = "member";
-
-    div.innerHTML =
-      (data.muted ? "🔇 " : "🎤 ") +
-      escapeHTML(data.username || "Member");
-
-    members.appendChild(div);
   });
-});
 
-function escapeHTML(text) {
 
-  const div = document.createElement("div");
-  div.textContent = text;
-  return div.innerHTML;
-}
+  Object.keys(peers).forEach(uid => {
 
-firebase.auth().onAuthStateChanged(async user => {
+    delete peers[uid];
 
-  if (!user) {
-    window.location.href = "index.html";
-    return;
-  }
+    const audio =
+      document.getElementById("audio-" + uid);
 
-  currentUser = user;
-
-  try {
-
-    const doc = await db
-      .collection("users")
-      .doc(user.uid)
-      .get();
-
-    if (!doc.exists || doc.data().approved !== true) {
-      window.location.href = "pending.html";
-      return;
+    if (audio) {
+      audio.remove();
     }
 
-    currentUser.username =
-      doc.data().username || "Member";
+  });
 
-    checkMicrophoneSupport();
 
-  } catch (error) {
+  if (currentUser) {
 
-    console.error(error);
+    try {
 
-    setStatus("❌ Unable to verify your clan account.");
-  }
-});
+      await db.collection("voiceRoom")
+        .doc(currentUser.uid)
+        .delete();
 
-window.addEventListener("beforeunload", () => {
+    } catch (error) {
 
-  if (currentUser && joined) {
+      console.error(error);
 
-    db.collection("voiceRoom")
-      .doc(currentUser.uid)
-      .delete()
-      .catch(() => {});
+    }
+
   }
 
-  if (localStream) {
-    localStream.getTracks().forEach(track => track.stop());
+
+  joinBtn.disabled = false;
+  muteBtn.disabled = true;
+  leaveBtn.disabled = true;
+
+  muteBtn.innerHTML = "🎤 MUTE";
+
+  statusBox.innerHTML =
+    "🔴 You left Clan Voice";
+
+}
+
+
+/* =========================
+   CLEANUP
+========================= */
+
+window.addEventListener(
+  "beforeunload",
+  () => {
+
+    if (localStream) {
+
+      localStream.getTracks().forEach(track => {
+        track.stop();
+      });
+
+    }
+
   }
-});
+);
+
+
+/* =========================
+   HTML ESCAPE
+========================= */
+
+function escapeHtml(text) {
+
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
 
 </script>
 
