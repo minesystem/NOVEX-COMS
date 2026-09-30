@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>NØV3X COMS - Members</title>
+  <title>NØV3X Members</title>
 
   <style>
     * {
@@ -15,93 +15,189 @@
     }
 
     body {
-      background: #08030f;
+      background: #09070f;
       color: white;
       min-height: 100vh;
     }
 
-    header {
+    .topbar {
       height: 65px;
-      background: #12051f;
+      background: #110d1d;
       border-bottom: 1px solid #7b2cff;
-
       display: flex;
       align-items: center;
       justify-content: space-between;
-
-      padding: 0 18px;
+      padding: 0 20px;
     }
 
     .logo {
-      color: #b76cff;
+      color: #bd75ff;
       font-size: 21px;
       font-weight: bold;
       letter-spacing: 2px;
     }
 
     .back {
-      background: #24103b;
-      border: 1px solid #7b2cff;
+      background: #251536;
       color: white;
+      border: 1px solid #7130a8;
       padding: 9px 14px;
-      border-radius: 7px;
+      border-radius: 8px;
       cursor: pointer;
     }
 
-    main {
-      max-width: 900px;
-      margin: auto;
-      padding: 25px 18px;
+    .back:hover {
+      background: #36204d;
     }
 
-    h1 {
-      color: #c88aff;
+    .main {
+      max-width: 1000px;
+      margin: auto;
+      padding: 25px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #160d24, #28103e);
+      border: 1px solid #722fc2;
+      border-radius: 14px;
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      color: #c37cff;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: #999;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      background: #110d19;
+      border: 1px solid #2b193d;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .stat-number {
+      color: #bd75ff;
+      font-size: 28px;
+      font-weight: bold;
       margin-bottom: 5px;
     }
 
-    .subtitle {
+    .stat-label {
       color: #777;
-      margin-bottom: 25px;
+      font-size: 13px;
     }
 
-    #memberCount {
-      color: #888;
-      margin-bottom: 15px;
-    }
-
-    #members {
+    .members {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 15px;
     }
 
     .member {
-      background: #11071c;
-      border: 1px solid #29133d;
-      border-radius: 10px;
-      padding: 16px;
+      background: #110d19;
+      border: 1px solid #2b193d;
+      border-radius: 12px;
+      padding: 18px;
+      transition: 0.2s;
     }
 
-    .member-name {
-      color: #b76cff;
+    .member:hover {
+      border-color: #7b2cff;
+      transform: translateY(-2px);
+    }
+
+    .member-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #25113a;
+      border: 1px solid #7b2cff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #c47dff;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .username {
       font-size: 17px;
       font-weight: bold;
+      word-break: break-word;
     }
 
-    .member-status {
-      color: #55e88a;
+    .role {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #bd75ff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .status {
+      border-top: 1px solid #24172f;
+      padding-top: 10px;
+      color: #62e58d;
       font-size: 12px;
-      margin-top: 7px;
+    }
+
+    .empty,
+    .loading,
+    .error {
+      background: #110d19;
+      border: 1px solid #2b193d;
+      border-radius: 12px;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .loading {
+      color: #999;
     }
 
     .empty {
       color: #777;
-      padding: 20px;
+    }
+
+    .error {
+      color: #ff7c88;
+      border-color: #6b2731;
     }
 
     @media (max-width: 600px) {
-      #members {
+      .main {
+        padding: 15px;
+      }
+
+      .stats {
         grid-template-columns: 1fr;
+      }
+
+      .logo {
+        font-size: 17px;
+      }
+
+      .back {
+        padding: 8px 10px;
       }
     }
   </style>
@@ -109,156 +205,325 @@
 
 <body>
 
-<header>
+  <div class="topbar">
 
-  <div class="logo">
-    NØV3X COMS
+    <div class="logo">
+      NØV3X COMS
+    </div>
+
+    <button class="back" onclick="goHome()">
+      ← DASHBOARD
+    </button>
+
   </div>
 
-  <button class="back" onclick="goHome()">
-    ← Dashboard
-  </button>
 
-</header>
+  <main class="main">
 
+    <div class="header">
 
-<main>
+      <h1>👥 NØV3X MEMBERS</h1>
 
-  <h1>👥 Members</h1>
+      <p>
+        Private clan member directory.
+      </p>
 
-  <p class="subtitle">
-    NOV3X COMS community members
-  </p>
-
-  <p id="memberCount">
-    Loading members...
-  </p>
-
-  <div id="members"></div>
-
-</main>
+    </div>
 
 
-<!-- FIREBASE -->
+    <div class="stats">
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+      <div class="stat">
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+        <div
+          id="memberCount"
+          class="stat-number"
+        >
+          -
+        </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+        <div class="stat-label">
+          APPROVED MEMBERS
+        </div>
 
-<script src="firebase-config.js"></script>
-
-
-<script>
-
-auth.onAuthStateChanged(function(user) {
-
-  if (!user) {
-
-    window.location.href = "index.html";
-
-    return;
-
-  }
-
-  loadMembers();
-
-});
+      </div>
 
 
-function loadMembers() {
+      <div class="stat">
 
-  db.collection("users")
-    .orderBy("createdAt", "asc")
-    .onSnapshot(
+        <div
+          id="adminCount"
+          class="stat-number"
+        >
+          -
+        </div>
 
-      function(snapshot) {
+        <div class="stat-label">
+          CLAN ADMINS
+        </div>
 
-        const container =
-          document.getElementById("members");
+      </div>
 
-        const count =
-          document.getElementById("memberCount");
-
-        container.innerHTML = "";
-
-        count.textContent =
-          snapshot.size + " member" +
-          (snapshot.size === 1 ? "" : "s");
+    </div>
 
 
-        if (snapshot.empty) {
+    <div
+      id="members"
+      class="loading"
+    >
+      Loading members...
+    </div>
 
-          container.innerHTML =
-            "<p class='empty'>No members found.</p>";
+  </main>
+
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <script src="firebase-config.js"></script>
+
+
+  <script>
+
+    let currentUser = null;
+
+
+    auth.onAuthStateChanged(async function(user) {
+
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      currentUser = user;
+
+      try {
+
+        const userDoc =
+          await db
+            .collection("users")
+            .doc(user.uid)
+            .get();
+
+        if (!userDoc.exists) {
+
+          await auth.signOut();
+
+          window.location.href = "index.html";
 
           return;
-
         }
 
+        const data = userDoc.data();
 
-        snapshot.forEach(function(doc) {
+        if (data.approved !== true) {
 
-          const data = doc.data();
+          window.location.href = "pending.html";
 
+          return;
+        }
 
-          const member =
-            document.createElement("div");
+        loadMembers();
 
-          member.className = "member";
+      } catch (error) {
 
+        console.error("Access error:", error);
 
-          const name =
-            document.createElement("div");
-
-          name.className = "member-name";
-
-          name.textContent =
-            data.username || "Unknown User";
-
-
-          const status =
-            document.createElement("div");
-
-          status.className = "member-status";
-
-          status.textContent =
-            "● NOV3X MEMBER";
-
-
-          member.appendChild(name);
-
-          member.appendChild(status);
-
-          container.appendChild(member);
-
-        });
-
-      },
-
-      function(error) {
-
-        console.error(error);
-
-        document.getElementById("memberCount")
-          .textContent =
-          "Unable to load members.";
+        document.getElementById("members").innerHTML = `
+          <div class="error">
+            Unable to verify clan access.
+          </div>
+        `;
 
       }
 
-    );
-
-}
+    });
 
 
-function goHome() {
+    function loadMembers() {
 
-  window.location.href = "home.html";
+      db.collection("users")
+        .where("approved", "==", true)
+        .onSnapshot(
 
-}
+          function(snapshot) {
 
-</script>
+            const container =
+              document.getElementById("members");
+
+            container.innerHTML = "";
+
+            if (snapshot.empty) {
+
+              container.innerHTML = `
+                <div class="empty">
+                  👥<br><br>
+                  No approved members found.
+                </div>
+              `;
+
+              document.getElementById(
+                "memberCount"
+              ).textContent = "0";
+
+              document.getElementById(
+                "adminCount"
+              ).textContent = "0";
+
+              return;
+            }
+
+
+            const members = [];
+
+            let admins = 0;
+
+
+            snapshot.forEach(function(doc) {
+
+              const data = doc.data();
+
+              members.push({
+                id: doc.id,
+                username: data.username || "Unknown",
+                role: data.role || "member"
+              });
+
+              if (data.role === "admin") {
+                admins++;
+              }
+
+            });
+
+
+            members.sort(function(a, b) {
+
+              return a.username
+                .toLowerCase()
+                .localeCompare(
+                  b.username.toLowerCase()
+                );
+
+            });
+
+
+            document.getElementById(
+              "memberCount"
+            ).textContent = members.length;
+
+
+            document.getElementById(
+              "adminCount"
+            ).textContent = admins;
+
+
+            members.forEach(function(member) {
+
+              const card =
+                document.createElement("div");
+
+              card.className = "member";
+
+
+              const firstLetter =
+                member.username
+                  .charAt(0)
+                  .toUpperCase();
+
+
+              const roleText =
+                member.role === "admin"
+                  ? "CLAN ADMIN"
+                  : "CLAN MEMBER";
+
+
+              card.innerHTML = `
+
+                <div class="member-top">
+
+                  <div class="avatar">
+                    ${escapeHTML(firstLetter)}
+                  </div>
+
+                  <div>
+
+                    <div class="username">
+                      ${escapeHTML(member.username)}
+                    </div>
+
+                    <div class="role">
+                      ${roleText}
+                    </div>
+
+                  </div>
+
+                </div>
+
+
+                <div class="status">
+                  ● APPROVED MEMBER
+                </div>
+
+              `;
+
+
+              container.appendChild(card);
+
+            });
+
+          },
+
+
+          function(error) {
+
+            console.error(
+              "Member loading error:",
+              error
+            );
+
+            document.getElementById(
+              "members"
+            ).innerHTML = `
+
+              <div class="error">
+
+                Unable to load members.
+
+                <br><br>
+
+                Check your Firestore rules.
+
+              </div>
+
+            `;
+
+          }
+
+        );
+
+    }
+
+
+    function escapeHTML(text) {
+
+      const div =
+        document.createElement("div");
+
+      div.textContent = text;
+
+      return div.innerHTML;
+
+    }
+
+
+    function goHome() {
+
+      window.location.href = "home.html";
+
+    }
+
+  </script>
 
 </body>
-</html>
+  </html>
