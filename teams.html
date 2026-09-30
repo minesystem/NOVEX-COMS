@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>NØV3X Team / Lineup</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #09070f;
+      color: white;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      height: 65px;
+      background: #110d1d;
+      border-bottom: 1px solid #7b2cff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+
+    .logo {
+      color: #bd75ff;
+      font-size: 21px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .back {
+      background: #251536;
+      color: white;
+      border: 1px solid #7130a8;
+      padding: 9px 14px;
+      border-radius: 8px;
+    }
+
+    .main {
+      max-width: 1000px;
+      margin: auto;
+      padding: 25px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #160d24, #28103e);
+      border: 1px solid #722fc2;
+      border-radius: 14px;
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      color: #c37cff;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: #999;
+    }
+
+    .admin-panel {
+      display: none;
+      background: #110d19;
+      border: 1px solid #7130a8;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .admin-panel h2 {
+      color: #d09aff;
+      margin-bottom: 15px;
+    }
+
+    .form {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 12px;
+      background: #09070f;
+      border: 1px solid #38224d;
+      border-radius: 8px;
+      color: white;
+      outline: none;
+    }
+
+    .add-btn {
+      background: #7b2cff;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      padding: 12px 18px;
+      font-weight: bold;
+    }
+
+    .add-btn:hover {
+      background: #994fff;
+    }
+
+    .lineup {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+    }
+
+    .player {
+      background: #110d19;
+      border: 1px solid #2b193d;
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .player:hover {
+      border-color: #7b2cff;
+    }
+
+    .player-number {
+      color: #8b43d9;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .player-name {
+      font-size: 20px;
+      font-weight: bold;
+      color: #d09aff;
+      margin-bottom: 6px;
+    }
+
+    .player-role {
+      color: #999;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .remove {
+      margin-top: 15px;
+      background: #2b1116;
+      border: 1px solid #6b2731;
+      color: #ff7c88;
+      padding: 8px 12px;
+      border-radius: 7px;
+      display: none;
+    }
+
+    .empty,
+    .loading,
+    .error {
+      grid-column: 1 / -1;
+      background: #110d19;
+      border: 1px solid #2b193d;
+      border-radius: 12px;
+      padding: 40px 20px;
+      text-align: center;
+      color: #777;
+    }
+
+    .error {
+      color: #ff7c88;
+    }
+
+    @media (max-width: 700px) {
+      .form {
+        grid-template-columns: 1fr;
+      }
+
+      .main {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="topbar">
+
+    <div class="logo">
+      NØV3X COMS
+    </div>
+
+    <button class="back" onclick="goHome()">
+      ← DASHBOARD
+    </button>
+
+  </div>
+
+
+  <main class="main">
+
+    <div class="header">
+      <h1>📋 TEAM / LINEUP</h1>
+      <p>NØV3X clan roster and active lineup.</p>
+    </div>
+
+
+    <div id="adminPanel" class="admin-panel">
+
+      <h2>👑 LINEUP MANAGEMENT</h2>
+
+      <div class="form">
+
+        <input
+          id="playerName"
+          type="text"
+          placeholder="Player username"
+          maxlength="30"
+        >
+
+        <select id="playerRole">
+          <option value="Player">Player</option>
+          <option value="IGL">IGL</option>
+          <option value="Entry">Entry</option>
+          <option value="Support">Support</option>
+          <option value="Sniper">Sniper</option>
+          <option value="Substitute">Substitute</option>
+        </select>
+
+        <button class="add-btn" onclick="addPlayer()">
+          + ADD PLAYER
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div id="lineup" class="lineup">
+
+      <div class="loading">
+        Loading lineup...
+      </div>
+
+    </div>
+
+  </main>
+
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <script src="firebase-config.js"></script>
+
+
+  <script>
+
+    let currentUser = null;
+    let currentRole = "member";
+
+
+    auth.onAuthStateChanged(async function(user) {
+
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      currentUser = user;
+
+      try {
+
+        const userDoc =
+          await db.collection("users")
+            .doc(user.uid)
+            .get();
+
+        if (!userDoc.exists) {
+          await auth.signOut();
+          window.location.href = "index.html";
+          return;
+        }
+
+        const data = userDoc.data();
+
+        if (data.approved !== true) {
+          window.location.href = "pending.html";
+          return;
+        }
+
+        currentRole = data.role || "member";
+
+        if (currentRole === "admin") {
+          document.getElementById("adminPanel").style.display = "block";
+        }
+
+        loadLineup();
+
+      } catch (error) {
+
+        console.error(error);
+
+        document.getElementById("lineup").innerHTML = `
+          <div class="error">
+            Unable to verify clan access.
+          </div>
+        `;
+
+      }
+
+    });
+
+
+    function loadLineup() {
+
+      db.collection("teams")
+        .orderBy("createdAt", "asc")
+        .onSnapshot(
+
+          function(snapshot) {
+
+            const container =
+              document.getElementById("lineup");
+
+            container.innerHTML = "";
+
+            if (snapshot.empty) {
+
+              container.innerHTML = `
+                <div class="empty">
+                  📋<br><br>
+                  No players have been added to the lineup yet.
+                </div>
+              `;
+
+              return;
+            }
+
+
+            let number = 1;
+
+
+            snapshot.forEach(function(doc) {
+
+              const data = doc.data();
+
+              const card =
+                document.createElement("div");
+
+              card.className = "player";
+
+              const name =
+                escapeHTML(
+                  data.username || "Unknown Player"
+                );
+
+              const role =
+                escapeHTML(
+                  data.role || "Player"
+                );
+
+
+              card.innerHTML = `
+
+                <div class="player-number">
+                  PLAYER ${number}
+                </div>
+
+                <div class="player-name">
+                  ${name}
+                </div>
+
+                <div class="player-role">
+                  ${role}
+                </div>
+
+                ${
+                  currentRole === "admin"
+                  ? `
+                    <button
+                      class="remove"
+                      style="display:block"
+                      onclick="removePlayer('${doc.id}')"
+                    >
+                      REMOVE
+                    </button>
+                  `
+                  : ""
+                }
+
+              `;
+
+
+              container.appendChild(card);
+
+              number++;
+
+            });
+
+          },
+
+
+          function(error) {
+
+            console.error(
+              "Lineup error:",
+              error
+            );
+
+            document.getElementById(
+              "lineup"
+            ).innerHTML = `
+
+              <div class="error">
+                Unable to load the lineup.
+              </div>
+
+            `;
+
+          }
+
+        );
+
+    }
+
+
+    async function addPlayer() {
+
+      if (currentRole !== "admin") {
+        return;
+      }
+
+      const name =
+        document.getElementById(
+          "playerName"
+        ).value.trim();
+
+      const role =
+        document.getElementById(
+          "playerRole"
+        ).value;
+
+
+      if (!name) {
+        alert("Enter a player username.");
+        return;
+      }
+
+
+      try {
+
+        await db.collection("teams").add({
+
+          username: name,
+
+          role: role,
+
+          createdBy: currentUser.uid,
+
+          createdAt:
+            firebase.firestore.FieldValue.serverTimestamp()
+
+        });
+
+
+        document.getElementById(
+          "playerName"
+        ).value = "";
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(
+          "Unable to add player. Check Firestore rules."
+        );
+
+      }
+
+    }
+
+
+    async function removePlayer(id) {
+
+      if (currentRole !== "admin") {
+        return;
+      }
+
+
+      if (!confirm("Remove this player from the lineup?")) {
+        return;
+      }
+
+
+      try {
+
+        await db.collection("teams")
+          .doc(id)
+          .delete();
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(
+          "Unable to remove player."
+        );
+
+      }
+
+    }
+
+
+    function escapeHTML(text) {
+
+      const div =
+        document.createElement("div");
+
+      div.textContent = text;
+
+      return div.innerHTML;
+
+    }
+
+
+    function goHome() {
+      window.location.href = "home.html";
+    }
+
+  </script>
+
+</body>
+</html>
