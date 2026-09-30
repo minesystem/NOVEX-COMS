@@ -4,243 +4,626 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>NOV3X COMS</title>
+  <title>NØV3X COMS</title>
 
-  <link rel="stylesheet" href="style.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
 
-  <!-- Firebase Compat SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    body {
+      min-height: 100vh;
+      background: #09070f;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
 
-  <!-- Firebase Configuration -->
-  <script src="firebase-config.js"></script>
+    .container {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .logo {
+      text-align: center;
+      color: #bd75ff;
+      font-size: 30px;
+      font-weight: bold;
+      letter-spacing: 3px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #777;
+      margin-bottom: 25px;
+    }
+
+    .box {
+      background: #110d19;
+      border: 1px solid #54277d;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 0 30px rgba(123, 44, 255, 0.12);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 11px;
+      border: none;
+      border-radius: 8px;
+      background: #21152e;
+      color: #aaa;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .tab.active {
+      background: #7b2cff;
+      color: white;
+    }
+
+    h2 {
+      margin-bottom: 18px;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      margin-bottom: 12px;
+      background: #0a0810;
+      border: 1px solid #38224d;
+      border-radius: 8px;
+      color: white;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #9b4cff;
+    }
+
+    .main-btn {
+      width: 100%;
+      padding: 13px;
+      background: #7b2cff;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+
+    .main-btn:hover {
+      background: #994fff;
+    }
+
+    .message {
+      display: none;
+      margin-bottom: 15px;
+      padding: 11px;
+      border-radius: 7px;
+      font-size: 13px;
+    }
+
+    .error {
+      display: block;
+      background: #2b1116;
+      border: 1px solid #6b2731;
+      color: #ff7c88;
+    }
+
+    .success {
+      display: block;
+      background: #102a18;
+      border: 1px solid #245c35;
+      color: #72e59a;
+    }
+
+    .pending {
+      text-align: center;
+      color: #aaa;
+      line-height: 1.6;
+      margin-top: 15px;
+    }
+
+    #registerForm {
+      display: none;
+    }
+
+    .small {
+      color: #777;
+      font-size: 11px;
+      text-align: center;
+      margin-top: 18px;
+      line-height: 1.5;
+    }
+  </style>
 </head>
 
 <body>
 
   <div class="container">
 
-    <div class="logo">NOV3X</div>
-    <div class="subtitle">COMS</div>
+    <div class="logo">
+      NØV3X COMS
+    </div>
 
-    <!-- LOGIN -->
-    <div id="loginBox" class="auth-box">
-
-      <h2>WELCOME BACK</h2>
-
-      <input
-        type="email"
-        id="loginEmail"
-        placeholder="Email"
-      >
-
-      <input
-        type="password"
-        id="loginPassword"
-        placeholder="Password"
-      >
-
-      <button onclick="login()">LOGIN</button>
-
-      <p>
-        Don't have an account?
-        <span onclick="showRegister()">REGISTER</span>
-      </p>
-
-      <div id="loginMessage"></div>
-
+    <div class="subtitle">
+      PRIVATE CLAN COMMAND CENTER
     </div>
 
 
-    <!-- REGISTER -->
-    <div id="registerBox" class="auth-box hidden">
+    <div class="box">
 
-      <h2>CREATE ACCOUNT</h2>
+      <div class="tabs">
 
-      <input
-        type="text"
-        id="registerUsername"
-        placeholder="Username"
-      >
+        <button
+          id="loginTab"
+          class="tab active"
+          onclick="showLogin()"
+        >
+          LOGIN
+        </button>
 
-      <input
-        type="email"
-        id="registerEmail"
-        placeholder="Email"
-      >
+        <button
+          id="registerTab"
+          class="tab"
+          onclick="showRegister()"
+        >
+          REGISTER
+        </button>
 
-      <input
-        type="password"
-        id="registerPassword"
-        placeholder="Password"
-      >
+      </div>
 
-      <input
-        type="password"
-        id="registerConfirm"
-        placeholder="Confirm Password"
-      >
 
-      <button onclick="register()">CREATE ACCOUNT</button>
+      <div id="message" class="message"></div>
 
-      <p>
-        Already have an account?
-        <span onclick="showLogin()">LOGIN</span>
-      </p>
 
-      <div id="registerMessage"></div>
+      <!-- LOGIN -->
+
+      <div id="loginForm">
+
+        <h2>Welcome Back</h2>
+
+        <input
+          type="email"
+          id="loginEmail"
+          placeholder="Email"
+        >
+
+        <input
+          type="password"
+          id="loginPassword"
+          placeholder="Password"
+        >
+
+        <button
+          class="main-btn"
+          onclick="login()"
+        >
+          LOGIN
+        </button>
+
+      </div>
+
+
+      <!-- REGISTER -->
+
+      <div id="registerForm">
+
+        <h2>Join NØV3X</h2>
+
+        <input
+          type="text"
+          id="registerUsername"
+          placeholder="Username"
+        >
+
+        <input
+          type="email"
+          id="registerEmail"
+          placeholder="Email"
+        >
+
+        <input
+          type="password"
+          id="registerPassword"
+          placeholder="Password"
+        >
+
+        <input
+          type="password"
+          id="registerConfirm"
+          placeholder="Confirm password"
+        >
+
+        <button
+          class="main-btn"
+          onclick="register()"
+        >
+          REQUEST MEMBERSHIP
+        </button>
+
+        <div class="pending">
+          New accounts require admin approval
+          before entering the private NØV3X clan.
+        </div>
+
+      </div>
+
+
+      <div class="small">
+        NØV3X COMS is a private clan communication system.
+      </div>
 
     </div>
 
   </div>
 
 
-<script>
+  <!-- FIREBASE -->
 
-function showRegister() {
-  document.getElementById("loginBox").classList.add("hidden");
-  document.getElementById("registerBox").classList.remove("hidden");
-}
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-function showLogin() {
-  document.getElementById("registerBox").classList.add("hidden");
-  document.getElementById("loginBox").classList.remove("hidden");
-}
+  <script src="firebase-config.js"></script>
 
 
-// REGISTER
+  <script>
 
-function register() {
+    /* =========================
+       TABS
+    ========================= */
 
-  const username =
-    document.getElementById("registerUsername").value.trim();
+    function showLogin() {
 
-  const email =
-    document.getElementById("registerEmail").value.trim();
+      document.getElementById("loginForm")
+        .style.display = "block";
 
-  const password =
-    document.getElementById("registerPassword").value;
+      document.getElementById("registerForm")
+        .style.display = "none";
 
-  const confirm =
-    document.getElementById("registerConfirm").value;
+      document.getElementById("loginTab")
+        .classList.add("active");
 
-  const message =
-    document.getElementById("registerMessage");
+      document.getElementById("registerTab")
+        .classList.remove("active");
 
+      clearMessage();
 
-  if (!username || !email || !password || !confirm) {
-    message.textContent = "Please fill in all fields.";
-    return;
-  }
-
-  if (password !== confirm) {
-    message.textContent = "Passwords do not match.";
-    return;
-  }
-
-  if (password.length < 6) {
-    message.textContent = "Password must be at least 6 characters.";
-    return;
-  }
+    }
 
 
-  message.textContent = "Creating account...";
+    function showRegister() {
+
+      document.getElementById("loginForm")
+        .style.display = "none";
+
+      document.getElementById("registerForm")
+        .style.display = "block";
+
+      document.getElementById("loginTab")
+        .classList.remove("active");
+
+      document.getElementById("registerTab")
+        .classList.add("active");
+
+      clearMessage();
+
+    }
 
 
-  auth.createUserWithEmailAndPassword(email, password)
+    /* =========================
+       MESSAGE
+    ========================= */
 
-    .then((userCredential) => {
+    function showMessage(text, type) {
 
-      const user = userCredential.user;
+      const box =
+        document.getElementById("message");
 
-      return db.collection("users")
-        .doc(user.uid)
-        .set({
-          username: username,
-          email: email,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+      box.textContent = text;
 
-    })
+      box.className =
+        "message " + type;
 
-    .then(() => {
-
-      message.textContent =
-        "Account created successfully!";
-
-      setTimeout(() => {
-        window.location.href = "home.html";
-      }, 1000);
-
-    })
-
-    .catch((error) => {
-
-      message.textContent = error.message;
-
-    });
-
-}
+    }
 
 
-// LOGIN
+    function clearMessage() {
 
-function login() {
+      const box =
+        document.getElementById("message");
 
-  const email =
-    document.getElementById("loginEmail").value.trim();
+      box.textContent = "";
 
-  const password =
-    document.getElementById("loginPassword").value;
+      box.className = "message";
 
-  const message =
-    document.getElementById("loginMessage");
+    }
 
 
-  if (!email || !password) {
-    message.textContent = "Enter your email and password.";
-    return;
-  }
+    /* =========================
+       LOGIN
+    ========================= */
+
+    async function login() {
+
+      const email =
+        document.getElementById("loginEmail")
+          .value.trim();
+
+      const password =
+        document.getElementById("loginPassword")
+          .value;
 
 
-  message.textContent = "Logging in...";
+      if (!email || !password) {
+
+        showMessage(
+          "Enter your email and password.",
+          "error"
+        );
+
+        return;
+      }
 
 
-  auth.signInWithEmailAndPassword(email, password)
+      try {
 
-    .then(() => {
-
-      message.textContent = "Login successful!";
-
-      setTimeout(() => {
-        window.location.href = "home.html";
-      }, 700);
-
-    })
-
-    .catch((error) => {
-
-      message.textContent = error.message;
-
-    });
-
-}
+        const result =
+          await auth.signInWithEmailAndPassword(
+            email,
+            password
+          );
 
 
-// CHECK LOGIN
+        const userDoc =
+          await db
+            .collection("users")
+            .doc(result.user.uid)
+            .get();
 
-auth.onAuthStateChanged((user) => {
 
-  if (user) {
+        if (!userDoc.exists) {
 
-    console.log("Logged in as:", user.email);
+          showMessage(
+            "Your account profile was not found.",
+            "error"
+          );
 
-  }
+          await auth.signOut();
 
-});
+          return;
+        }
 
-</script>
+
+        const data =
+          userDoc.data();
+
+
+        /* ADMIN */
+
+        if (
+          data.role === "admin" &&
+          data.approved === true
+        ) {
+
+          window.location.href =
+            "home.html";
+
+          return;
+        }
+
+
+        /* APPROVED MEMBER */
+
+        if (data.approved === true) {
+
+          window.location.href =
+            "home.html";
+
+          return;
+        }
+
+
+        /* PENDING MEMBER */
+
+        showMessage(
+          "Your account is waiting for NØV3X admin approval.",
+          "error"
+        );
+
+        await auth.signOut();
+
+      }
+
+      catch (error) {
+
+        console.error(error);
+
+        showMessage(
+          getFirebaseError(error),
+          "error"
+        );
+
+      }
+
+    }
+
+
+    /* =========================
+       REGISTER
+    ========================= */
+
+    async function register() {
+
+      const username =
+        document.getElementById("registerUsername")
+          .value.trim();
+
+      const email =
+        document.getElementById("registerEmail")
+          .value.trim();
+
+      const password =
+        document.getElementById("registerPassword")
+          .value;
+
+      const confirm =
+        document.getElementById("registerConfirm")
+          .value;
+
+
+      if (!username || !email || !password || !confirm) {
+
+        showMessage(
+          "Complete all fields.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      if (password !== confirm) {
+
+        showMessage(
+          "Passwords do not match.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      if (password.length < 6) {
+
+        showMessage(
+          "Password must be at least 6 characters.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      try {
+
+        const result =
+          await auth.createUserWithEmailAndPassword(
+            email,
+            password
+          );
+
+
+        /*
+          IMPORTANT:
+          Every new account starts as:
+
+          role = member
+          approved = false
+
+          The user cannot make themselves
+          an admin.
+        */
+
+        await db
+          .collection("users")
+          .doc(result.user.uid)
+          .set({
+
+            username: username,
+
+            email: email,
+
+            role: "member",
+
+            approved: false,
+
+            createdAt:
+              firebase.firestore.FieldValue.serverTimestamp()
+
+          });
+
+
+        await auth.signOut();
+
+
+        showMessage(
+          "Membership request submitted. An NØV3X admin must approve your account.",
+          "success"
+        );
+
+
+        document.getElementById("registerUsername")
+          .value = "";
+
+        document.getElementById("registerEmail")
+          .value = "";
+
+        document.getElementById("registerPassword")
+          .value = "";
+
+        document.getElementById("registerConfirm")
+          .value = "";
+
+      }
+
+      catch (error) {
+
+        console.error(error);
+
+        showMessage(
+          getFirebaseError(error),
+          "error"
+        );
+
+      }
+
+    }
+
+
+    /* =========================
+       FIREBASE ERROR MESSAGE
+    ========================= */
+
+    function getFirebaseError(error) {
+
+      switch (error.code) {
+
+        case "auth/email-already-in-use":
+          return "That email is already registered.";
+
+        case "auth/invalid-email":
+          return "Enter a valid email address.";
+
+        case "auth/weak-password":
+          return "Password is too weak.";
+
+        case "auth/invalid-credential":
+          return "Incorrect email or password.";
+
+        default:
+          return error.message || "Something went wrong.";
+
+      }
+
+    }
+
+  </script>
 
 </body>
-        </html>
+</html>
