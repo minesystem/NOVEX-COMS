@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>NØV3X COMS - Scrimmage</title>
+  <title>NØV3X Scrimmage</title>
 
   <style>
     * {
@@ -15,85 +15,150 @@
     }
 
     body {
-      background: #08030f;
+      background: #09070f;
       color: white;
       min-height: 100vh;
     }
 
-    header {
+    .topbar {
       height: 65px;
-      background: #12051f;
+      background: #110d1d;
       border-bottom: 1px solid #7b2cff;
-
       display: flex;
       align-items: center;
       justify-content: space-between;
-
-      padding: 0 18px;
+      padding: 0 20px;
     }
 
     .logo {
-      color: #b76cff;
+      color: #bd75ff;
       font-size: 21px;
       font-weight: bold;
       letter-spacing: 2px;
     }
 
-    .back {
-      background: #24103b;
-      border: 1px solid #7b2cff;
-      color: white;
-      padding: 9px 14px;
-      border-radius: 7px;
+    button {
       cursor: pointer;
     }
 
-    main {
+    .back {
+      background: #251536;
+      color: white;
+      border: 1px solid #7130a8;
+      padding: 9px 14px;
+      border-radius: 8px;
+    }
+
+    .main {
       max-width: 1000px;
       margin: auto;
-      padding: 25px 18px;
+      padding: 25px;
     }
 
-    h1 {
-      color: #c88aff;
-      margin-bottom: 5px;
+    .header {
+      background: linear-gradient(135deg, #160d24, #28103e);
+      border: 1px solid #722fc2;
+      border-radius: 14px;
+      padding: 25px;
+      margin-bottom: 20px;
     }
 
-    .subtitle {
-      color: #777;
-      margin-bottom: 25px;
+    .header h1 {
+      color: #c37cff;
+      margin-bottom: 8px;
     }
 
-    .event {
-      background: #11071c;
-      border: 1px solid #29133d;
+    .header p {
+      color: #999;
+    }
+
+    .admin-panel {
+      display: none;
+      background: #110d19;
+      border: 1px solid #7130a8;
       border-radius: 12px;
       padding: 20px;
       margin-bottom: 20px;
     }
 
-    .event h2 {
-      color: #b76cff;
+    .admin-panel h2 {
+      color: #d09aff;
       margin-bottom: 15px;
     }
 
-    .info {
+    .form {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
       gap: 10px;
     }
 
-    .info-box {
-      background: #0d0615;
-      border: 1px solid #241333;
+    input,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      background: #09070f;
+      border: 1px solid #38224d;
+      border-radius: 8px;
+      color: white;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: #9b4cff;
+    }
+
+    .create-btn {
+      background: #7b2cff;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    .create-btn:hover {
+      background: #994fff;
+    }
+
+    .scrim {
+      background: #110d19;
+      border: 1px solid #2b193d;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+
+    .scrim-title {
+      color: #d09aff;
+      font-size: 21px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .scrim-info {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .info {
+      background: #0c0911;
+      border: 1px solid #25172f;
       border-radius: 8px;
       padding: 12px;
     }
 
     .label {
       color: #777;
-      font-size: 11px;
+      font-size: 10px;
       margin-bottom: 5px;
+      text-transform: uppercase;
     }
 
     .value {
@@ -101,38 +166,56 @@
       font-weight: bold;
     }
 
-    .slots-title {
-      margin: 20px 0 12px;
-      color: #c88aff;
+    .description {
+      color: #bbb;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      margin-bottom: 15px;
     }
 
-    .slots {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-    }
-
-    .slot {
-      background: #0d0615;
-      border: 1px solid #29133d;
-      border-radius: 8px;
-      padding: 12px;
-    }
-
-    .slot-number {
-      color: #b76cff;
+    .status {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: #102a18;
+      border: 1px solid #245c35;
+      color: #72e59a;
+      font-size: 11px;
       font-weight: bold;
     }
 
-    .open {
-      color: #55e88a;
-      font-size: 12px;
+    .delete-btn {
+      margin-top: 15px;
+      background: #2b1116;
+      color: #ff7c88;
+      border: 1px solid #6b2731;
+      padding: 8px 12px;
+      border-radius: 7px;
+      display: none;
     }
 
-    @media (max-width: 600px) {
-      .info,
-      .slots {
+    .empty,
+    .loading,
+    .error {
+      background: #110d19;
+      border: 1px solid #2b193d;
+      border-radius: 12px;
+      padding: 40px 20px;
+      text-align: center;
+      color: #777;
+    }
+
+    .error {
+      color: #ff7c88;
+    }
+
+    @media (max-width: 700px) {
+      .scrim-info {
         grid-template-columns: 1fr;
+      }
+
+      .main {
+        padding: 15px;
       }
     }
   </style>
@@ -140,151 +223,603 @@
 
 <body>
 
-<header>
+  <div class="topbar">
 
-  <div class="logo">
-    NØV3X COMS
+    <div class="logo">
+      NØV3X COMS
+    </div>
+
+    <button class="back" onclick="goHome()">
+      ← DASHBOARD
+    </button>
+
   </div>
 
-  <button class="back" onclick="goHome()">
-    ← Dashboard
-  </button>
 
-</header>
+  <main class="main">
 
+    <div class="header">
 
-<main>
+      <h1>🎮 NØV3X SCRIMMAGE</h1>
 
-  <h1>🎮 Scrimmage</h1>
+      <p>
+        Clan scrimmage events and match information.
+      </p>
 
-  <p class="subtitle">
-    NØV3X CODM Scrimmage Management
-  </p>
+    </div>
 
 
-  <div class="event">
+    <!-- ADMIN ONLY -->
 
-    <h2>
-      NØV3X CORE SCRIMMAGE
-    </h2>
+    <div
+      id="adminPanel"
+      class="admin-panel"
+    >
 
+      <h2>👑 CREATE SCRIMMAGE</h2>
 
-    <div class="info">
+      <div class="form">
 
-      <div class="info-box">
-        <div class="label">DATE</div>
-        <div class="value" id="eventDate">
-          Not Set
-        </div>
-      </div>
+        <input
+          id="title"
+          type="text"
+          placeholder="Scrimmage title"
+          maxlength="60"
+        >
 
-      <div class="info-box">
-        <div class="label">TIME</div>
-        <div class="value" id="eventTime">
-          Not Set
-        </div>
-      </div>
+        <input
+          id="date"
+          type="date"
+        >
 
-      <div class="info-box">
-        <div class="label">MAPS</div>
-        <div class="value">
-          ISO - BO - ISO
-        </div>
-      </div>
+        <input
+          id="time"
+          type="time"
+        >
 
-      <div class="info-box">
-        <div class="label">STATUS</div>
-        <div class="value" style="color:#55e88a;">
-          ● OPEN
-        </div>
+        <input
+          id="maps"
+          type="text"
+          placeholder="Maps — example: ISO - BO - ISO"
+          maxlength="50"
+        >
+
+        <textarea
+          id="description"
+          placeholder="Scrimmage rules / notes"
+          maxlength="500"
+        ></textarea>
+
+        <button
+          class="create-btn"
+          onclick="createScrimmage()"
+        >
+          + CREATE SCRIMMAGE
+        </button>
+
       </div>
 
     </div>
 
 
-    <h3 class="slots-title">
-      TRYOUT / SCRIMMAGE SLOTS
-    </h3>
+    <!-- SCRIMMAGES -->
 
+    <div id="scrimmages">
 
-    <div class="slots" id="slots">
-
-      <!-- Slots generated by JavaScript -->
+      <div class="loading">
+        Loading scrimmages...
+      </div>
 
     </div>
 
-  </div>
-
-</main>
+  </main>
 
 
-<!-- FIREBASE -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
-<script src="firebase-config.js"></script>
+  <script src="firebase-config.js"></script>
 
 
-<script>
+  <script>
 
-auth.onAuthStateChanged(function(user) {
-
-  if (!user) {
-    window.location.href = "index.html";
-    return;
-  }
-
-  createSlots();
-
-});
+    let currentUser = null;
+    let currentRole = "member";
 
 
-function createSlots() {
+    // =========================
+    // AUTH CHECK
+    // =========================
 
-  const container =
-    document.getElementById("slots");
+    auth.onAuthStateChanged(async function(user) {
 
-  container.innerHTML = "";
+      if (!user) {
 
+        window.location.href = "index.html";
 
-  for (let i = 1; i <= 25; i++) {
-
-    const slot =
-      document.createElement("div");
-
-    slot.className = "slot";
+        return;
+      }
 
 
-    slot.innerHTML = `
-      <div class="slot-number">
-        SLOT ${i}
-      </div>
-
-      <div class="open">
-        OPEN
-      </div>
-    `;
+      currentUser = user;
 
 
-    container.appendChild(slot);
+      try {
 
-  }
+        const userDoc =
+          await db.collection("users")
+            .doc(user.uid)
+            .get();
 
-}
+
+        if (!userDoc.exists) {
+
+          await auth.signOut();
+
+          window.location.href = "index.html";
+
+          return;
+        }
 
 
-function goHome() {
+        const data =
+          userDoc.data();
 
-  window.location.href =
-    "home.html";
 
-}
+        if (data.approved !== true) {
 
-</script>
+          window.location.href = "pending.html";
+
+          return;
+        }
+
+
+        currentRole =
+          data.role || "member";
+
+
+        if (currentRole === "admin") {
+
+          document.getElementById(
+            "adminPanel"
+          ).style.display = "block";
+
+        }
+
+
+        loadScrimmages();
+
+
+      } catch (error) {
+
+        console.error(
+          "Access error:",
+          error
+        );
+
+      }
+
+    });
+
+
+    // =========================
+    // LOAD SCRIMMAGES
+    // =========================
+
+    function loadScrimmages() {
+
+      db.collection("scrimmages")
+        .orderBy("createdAt", "desc")
+        .onSnapshot(
+
+          function(snapshot) {
+
+            const container =
+              document.getElementById(
+                "scrimmages"
+              );
+
+
+            container.innerHTML = "";
+
+
+            if (snapshot.empty) {
+
+              container.innerHTML = `
+
+                <div class="empty">
+
+                  🎮<br><br>
+
+                  No clan scrimmages scheduled.
+
+                </div>
+
+              `;
+
+              return;
+            }
+
+
+            snapshot.forEach(function(doc) {
+
+              const data =
+                doc.data();
+
+
+              const card =
+                document.createElement(
+                  "div"
+                );
+
+
+              card.className =
+                "scrim";
+
+
+              const title =
+                escapeHTML(
+                  data.title ||
+                  "NØV3X Scrimmage"
+                );
+
+
+              const maps =
+                escapeHTML(
+                  data.maps ||
+                  "Not specified"
+                );
+
+
+              const description =
+                escapeHTML(
+                  data.description ||
+                  "No additional information."
+                );
+
+
+              let date =
+                "Date not set";
+
+
+              if (data.date) {
+
+                date =
+                  data.date;
+
+              }
+
+
+              let time =
+                "Time not set";
+
+
+              if (data.time) {
+
+                time =
+                  data.time;
+
+              }
+
+
+              card.innerHTML = `
+
+                <div class="scrim-title">
+
+                  🎮 ${title}
+
+                </div>
+
+
+                <div class="scrim-info">
+
+                  <div class="info">
+
+                    <div class="label">
+                      DATE
+                    </div>
+
+                    <div class="value">
+                      ${date}
+                    </div>
+
+                  </div>
+
+
+                  <div class="info">
+
+                    <div class="label">
+                      TIME
+                    </div>
+
+                    <div class="value">
+                      ${time}
+                    </div>
+
+                  </div>
+
+
+                  <div class="info">
+
+                    <div class="label">
+                      MAPS
+                    </div>
+
+                    <div class="value">
+                      ${maps}
+                    </div>
+
+                  </div>
+
+                </div>
+
+
+                <div class="description">
+
+                  ${description}
+
+                </div>
+
+
+                <div class="status">
+                  ● CLAN SCRIMMAGE
+                </div>
+
+
+                ${
+                  currentRole === "admin"
+                  ? `
+
+                    <br>
+
+                    <button
+                      class="delete-btn"
+                      style="display:inline-block"
+                      onclick="deleteScrimmage('${doc.id}')"
+                    >
+                      DELETE SCRIMMAGE
+                    </button>
+
+                  `
+                  : ""
+                }
+
+              `;
+
+
+              container.appendChild(card);
+
+            });
+
+          },
+
+
+          function(error) {
+
+            console.error(
+              "Scrimmage error:",
+              error
+            );
+
+
+            document.getElementById(
+              "scrimmages"
+            ).innerHTML = `
+
+              <div class="error">
+
+                Unable to load scrimmages.
+
+                <br><br>
+
+                Check your Firestore rules.
+
+              </div>
+
+            `;
+
+          }
+
+        );
+
+    }
+
+
+    // =========================
+    // CREATE SCRIMMAGE
+    // =========================
+
+    async function createScrimmage() {
+
+      if (currentRole !== "admin") {
+
+        return;
+
+      }
+
+
+      const title =
+        document.getElementById(
+          "title"
+        ).value.trim();
+
+
+      const date =
+        document.getElementById(
+          "date"
+        ).value;
+
+
+      const time =
+        document.getElementById(
+          "time"
+        ).value;
+
+
+      const maps =
+        document.getElementById(
+          "maps"
+        ).value.trim();
+
+
+      const description =
+        document.getElementById(
+          "description"
+        ).value.trim();
+
+
+      if (!title || !date || !time) {
+
+        alert(
+          "Enter the scrimmage title, date, and time."
+        );
+
+        return;
+
+      }
+
+
+      try {
+
+        await db.collection(
+          "scrimmages"
+        ).add({
+
+          title: title,
+
+          date: date,
+
+          time: time,
+
+          maps: maps,
+
+          description: description,
+
+          createdBy:
+            currentUser.uid,
+
+          createdAt:
+            firebase.firestore.FieldValue.serverTimestamp()
+
+        });
+
+
+        document.getElementById(
+          "title"
+        ).value = "";
+
+
+        document.getElementById(
+          "date"
+        ).value = "";
+
+
+        document.getElementById(
+          "time"
+        ).value = "";
+
+
+        document.getElementById(
+          "maps"
+        ).value = "";
+
+
+        document.getElementById(
+          "description"
+        ).value = "";
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(
+          "Unable to create scrimmage."
+        );
+
+      }
+
+    }
+
+
+    // =========================
+    // DELETE SCRIMMAGE
+    // =========================
+
+    async function deleteScrimmage(id) {
+
+      if (currentRole !== "admin") {
+
+        return;
+
+      }
+
+
+      if (
+        !confirm(
+          "Delete this scrimmage?"
+        )
+      ) {
+
+        return;
+
+      }
+
+
+      try {
+
+        await db.collection(
+          "scrimmages"
+        )
+        .doc(id)
+        .delete();
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(
+          "Unable to delete scrimmage."
+        );
+
+      }
+
+    }
+
+
+    // =========================
+    // SECURITY
+    // =========================
+
+    function escapeHTML(text) {
+
+      const div =
+        document.createElement(
+          "div"
+        );
+
+      div.textContent =
+        text;
+
+      return div.innerHTML;
+
+    }
+
+
+    // =========================
+    // DASHBOARD
+    // =========================
+
+    function goHome() {
+
+      window.location.href =
+        "home.html";
+
+    }
+
+  </script>
 
 </body>
 </html>
