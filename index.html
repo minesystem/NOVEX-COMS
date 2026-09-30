@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>NOV3X COMS</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Firebase Compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <!-- Firebase Configuration -->
+  <script src="firebase-config.js"></script>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="logo">NOV3X</div>
+    <div class="subtitle">COMS</div>
+
+    <!-- LOGIN -->
+    <div id="loginBox" class="auth-box">
+
+      <h2>WELCOME BACK</h2>
+
+      <input
+        type="email"
+        id="loginEmail"
+        placeholder="Email"
+      >
+
+      <input
+        type="password"
+        id="loginPassword"
+        placeholder="Password"
+      >
+
+      <button onclick="login()">LOGIN</button>
+
+      <p>
+        Don't have an account?
+        <span onclick="showRegister()">REGISTER</span>
+      </p>
+
+      <div id="loginMessage"></div>
+
+    </div>
+
+
+    <!-- REGISTER -->
+    <div id="registerBox" class="auth-box hidden">
+
+      <h2>CREATE ACCOUNT</h2>
+
+      <input
+        type="text"
+        id="registerUsername"
+        placeholder="Username"
+      >
+
+      <input
+        type="email"
+        id="registerEmail"
+        placeholder="Email"
+      >
+
+      <input
+        type="password"
+        id="registerPassword"
+        placeholder="Password"
+      >
+
+      <input
+        type="password"
+        id="registerConfirm"
+        placeholder="Confirm Password"
+      >
+
+      <button onclick="register()">CREATE ACCOUNT</button>
+
+      <p>
+        Already have an account?
+        <span onclick="showLogin()">LOGIN</span>
+      </p>
+
+      <div id="registerMessage"></div>
+
+    </div>
+
+  </div>
+
+
+<script>
+
+function showRegister() {
+  document.getElementById("loginBox").classList.add("hidden");
+  document.getElementById("registerBox").classList.remove("hidden");
+}
+
+function showLogin() {
+  document.getElementById("registerBox").classList.add("hidden");
+  document.getElementById("loginBox").classList.remove("hidden");
+}
+
+
+// REGISTER
+
+function register() {
+
+  const username =
+    document.getElementById("registerUsername").value.trim();
+
+  const email =
+    document.getElementById("registerEmail").value.trim();
+
+  const password =
+    document.getElementById("registerPassword").value;
+
+  const confirm =
+    document.getElementById("registerConfirm").value;
+
+  const message =
+    document.getElementById("registerMessage");
+
+
+  if (!username || !email || !password || !confirm) {
+    message.textContent = "Please fill in all fields.";
+    return;
+  }
+
+  if (password !== confirm) {
+    message.textContent = "Passwords do not match.";
+    return;
+  }
+
+  if (password.length < 6) {
+    message.textContent = "Password must be at least 6 characters.";
+    return;
+  }
+
+
+  message.textContent = "Creating account...";
+
+
+  auth.createUserWithEmailAndPassword(email, password)
+
+    .then((userCredential) => {
+
+      const user = userCredential.user;
+
+      return db.collection("users")
+        .doc(user.uid)
+        .set({
+          username: username,
+          email: email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+    })
+
+    .then(() => {
+
+      message.textContent =
+        "Account created successfully!";
+
+      setTimeout(() => {
+        window.location.href = "home.html";
+      }, 1000);
+
+    })
+
+    .catch((error) => {
+
+      message.textContent = error.message;
+
+    });
+
+}
+
+
+// LOGIN
+
+function login() {
+
+  const email =
+    document.getElementById("loginEmail").value.trim();
+
+  const password =
+    document.getElementById("loginPassword").value;
+
+  const message =
+    document.getElementById("loginMessage");
+
+
+  if (!email || !password) {
+    message.textContent = "Enter your email and password.";
+    return;
+  }
+
+
+  message.textContent = "Logging in...";
+
+
+  auth.signInWithEmailAndPassword(email, password)
+
+    .then(() => {
+
+      message.textContent = "Login successful!";
+
+      setTimeout(() => {
+        window.location.href = "home.html";
+      }, 700);
+
+    })
+
+    .catch((error) => {
+
+      message.textContent = error.message;
+
+    });
+
+}
+
+
+// CHECK LOGIN
+
+auth.onAuthStateChanged((user) => {
+
+  if (user) {
+
+    console.log("Logged in as:", user.email);
+
+  }
+
+});
+
+</script>
+
+</body>
+        </html>
