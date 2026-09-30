@@ -15,29 +15,29 @@
     }
 
     body {
-      background: #08030f;
+      background: #09070f;
       color: white;
       min-height: 100vh;
     }
 
     /* TOP BAR */
-
     .topbar {
       height: 65px;
-      background: #12051f;
+      background: #110d1d;
       border-bottom: 1px solid #7b2cff;
-
       display: flex;
       align-items: center;
       justify-content: space-between;
-
       padding: 0 20px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
     .logo {
-      color: #b76cff;
       font-size: 22px;
       font-weight: bold;
+      color: #b86cff;
       letter-spacing: 2px;
     }
 
@@ -45,182 +45,197 @@
       background: #7b2cff;
       color: white;
       border: none;
-
       padding: 10px 16px;
-
-      border-radius: 7px;
-
+      border-radius: 8px;
       cursor: pointer;
       font-weight: bold;
     }
 
     .logout:hover {
-      background: #9850ff;
+      background: #9b55ff;
     }
 
-
     /* LAYOUT */
-
     .layout {
       display: flex;
       min-height: calc(100vh - 65px);
     }
 
-
     /* SIDEBAR */
-
     .sidebar {
-      width: 225px;
-
-      background: #0e0618;
-
-      border-right: 1px solid #29133d;
-
+      width: 230px;
+      background: #0d0a15;
+      border-right: 1px solid #27153d;
       padding: 20px 12px;
     }
 
-    .section-title {
-      color: #777;
-
-      font-size: 11px;
-
-      margin: 10px;
-
+    .side-title {
+      color: #8e5cff;
+      font-size: 12px;
+      font-weight: bold;
+      margin: 15px 10px 8px;
+      text-transform: uppercase;
       letter-spacing: 1px;
     }
 
     .nav-btn {
       width: 100%;
-
-      padding: 13px;
-
-      margin-bottom: 7px;
-
       background: transparent;
-
+      color: #ddd;
       border: none;
-
-      color: #ccc;
-
       text-align: left;
-
-      border-radius: 7px;
-
+      padding: 13px 12px;
+      margin-bottom: 5px;
+      border-radius: 8px;
       cursor: pointer;
-
       font-size: 14px;
-
-      transition: 0.2s;
     }
 
     .nav-btn:hover {
-      background: #24103b;
-
-      color: #c88aff;
+      background: #211532;
+      color: #c98aff;
     }
 
-    .nav-btn.active {
-      background: #24103b;
-
-      color: #c88aff;
+    .admin-btn {
+      color: #ffcc66;
     }
-
 
     /* MAIN */
-
     .main {
       flex: 1;
-
-      padding: 25px;
+      padding: 30px;
+      max-width: 1300px;
     }
 
-
-    /* WELCOME */
-
     .welcome {
+      background: linear-gradient(135deg, #160d24, #24103a);
+      border: 1px solid #6e2ac2;
+      border-radius: 14px;
+      padding: 25px;
       margin-bottom: 25px;
     }
 
     .welcome h1 {
       font-size: 28px;
+      margin-bottom: 8px;
+    }
 
-      margin-bottom: 7px;
+    .welcome h1 span {
+      color: #b66cff;
     }
 
     .welcome p {
-      color: #888;
+      color: #aaa;
     }
 
+    .section-title {
+      font-size: 18px;
+      margin: 25px 0 12px;
+      color: #c084ff;
+    }
 
     /* CARDS */
-
     .cards {
       display: grid;
-
-      grid-template-columns:
-        repeat(3, 1fr);
-
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
       gap: 15px;
     }
 
     .card {
-      background: #11071c;
-
-      border: 1px solid #29133d;
-
+      background: #110d19;
+      border: 1px solid #2b193d;
       border-radius: 12px;
-
       padding: 20px;
-
-      min-height: 140px;
-
       cursor: pointer;
-
       transition: 0.2s;
     }
 
     .card:hover {
-      border-color: #7b2cff;
+      transform: translateY(-3px);
+      border-color: #8a3cff;
+      background: #171021;
+    }
 
-      transform: translateY(-2px);
+    .card-icon {
+      font-size: 30px;
+      margin-bottom: 12px;
     }
 
     .card h3 {
-      color: #b76cff;
-
-      margin-bottom: 12px;
+      margin-bottom: 7px;
     }
 
     .card p {
       color: #999;
-
-      font-size: 14px;
-
-      line-height: 1.5;
+      font-size: 13px;
+      line-height: 1.4;
     }
 
-    .status {
-      color: #55e88a !important;
+    /* ADMIN */
+    .admin-section {
+      display: none;
+    }
 
+    .admin-section.show {
+      display: block;
+    }
+
+    .admin-card {
+      background: #15100c;
+      border: 1px solid #77501a;
+      border-radius: 12px;
+      padding: 20px;
       margin-top: 15px;
     }
 
+    .admin-card h3 {
+      color: #ffca68;
+      margin-bottom: 8px;
+    }
+
+    .admin-card p {
+      color: #aaa;
+      font-size: 13px;
+    }
+
+    .status {
+      margin-top: 25px;
+      background: #0e1711;
+      border: 1px solid #245b35;
+      padding: 15px;
+      border-radius: 10px;
+      color: #75e69b;
+    }
+
+    .role {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: #241438;
+      color: #c88aff;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .role.admin {
+      background: #35260d;
+      color: #ffd166;
+    }
 
     /* MOBILE */
-
-    @media (max-width: 750px) {
-
+    @media (max-width: 700px) {
       .sidebar {
         width: 70px;
+        padding: 15px 8px;
       }
 
-      .section-title {
+      .side-title {
         display: none;
       }
 
       .nav-btn {
         font-size: 0;
-
         text-align: center;
       }
 
@@ -228,424 +243,367 @@
         font-size: 20px;
       }
 
-      .cards {
-        grid-template-columns: 1fr;
-      }
-
       .main {
         padding: 18px;
       }
 
       .welcome h1 {
-        font-size: 24px;
+        font-size: 23px;
       }
     }
-
   </style>
 </head>
 
-
 <body>
 
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="logo">NØV3X COMS</div>
 
-<!-- TOP BAR -->
-
-<header class="topbar">
-
-  <div class="logo">
-    NØV3X COMS
+    <button class="logout" onclick="logout()">
+      LOGOUT
+    </button>
   </div>
 
-  <button
-    class="logout"
-    onclick="logout()">
+  <div class="layout">
 
-    LOGOUT
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
 
-  </button>
+      <div class="side-title">MAIN</div>
 
-</header>
+      <button class="nav-btn" onclick="goHome()">
+        🏠 Dashboard
+      </button>
 
+      <button class="nav-btn" onclick="goChat()">
+        💬 Clan Chat
+      </button>
 
-
-<div class="layout">
-
-
-  <!-- SIDEBAR -->
-
-  <aside class="sidebar">
-
-
-    <div class="section-title">
-      MAIN
-    </div>
+      <button class="nav-btn" onclick="goMembers()">
+        👥 Members
+      </button>
 
 
-    <button
-      class="nav-btn active"
-      onclick="goHome()">
+      <div class="side-title">CLAN</div>
 
-      🏠 Dashboard
+      <button class="nav-btn" onclick="goAnnouncements()">
+        📢 Announcements
+      </button>
 
-    </button>
+      <button class="nav-btn" onclick="goScrimmage()">
+        🎮 Scrimmage
+      </button>
 
+      <button class="nav-btn" onclick="goTeams()">
+        📋 Team / Lineup
+      </button>
 
-    <button
-      class="nav-btn"
-      onclick="goChat()">
-
-      💬 Chat
-
-    </button>
-
-
-    <button
-      class="nav-btn"
-      onclick="goMembers()">
-
-      👥 Members
-
-    </button>
+      <button class="nav-btn" onclick="goLeaderboard()">
+        🏆 Leaderboard
+      </button>
 
 
+      <div class="side-title">ADMIN</div>
 
-    <div class="section-title">
-      COMMUNITY
-    </div>
+      <button
+        id="adminNav"
+        class="nav-btn admin-btn"
+        onclick="goAdmin()"
+        style="display:none;"
+      >
+        👑 Admin Panel
+      </button>
 
-
-    <button
-      class="nav-btn"
-      onclick="goScrimmage()">
-
-      🎮 Scrimmage
-
-    </button>
-
-
-    <button
-      class="nav-btn"
-      onclick="goTeams()">
-
-      📋 Team List
-
-    </button>
+    </aside>
 
 
-    <button
-      class="nav-btn"
-      onclick="goLeaderboard()">
+    <!-- MAIN CONTENT -->
+    <main class="main">
 
-      🏆 Leaderboard
+      <!-- WELCOME -->
+      <div class="welcome">
 
-    </button>
-
-
-  </aside>
-
-
-
-  <!-- MAIN CONTENT -->
-
-  <main class="main">
-
-
-    <div class="welcome">
-
-      <h1 id="welcome">
-        Welcome!
-      </h1>
-
-      <p>
-        Welcome to the NOV3X COMS community.
-      </p>
-
-    </div>
-
-
-
-    <div class="cards">
-
-
-      <!-- CHAT -->
-
-      <div
-        class="card"
-        onclick="goChat()">
-
-        <h3>
-          💬 CHAT
-        </h3>
+        <h1>
+          Welcome, <span id="username">...</span>!
+        </h1>
 
         <p>
-          Talk with other NOV3X members
-          through the community chat.
+          Welcome to the private NØV3X clan command center.
         </p>
+
+        <div id="roleBadge" class="role">
+          MEMBER
+        </div>
 
       </div>
 
 
+      <!-- CLAN FEATURES -->
+      <div class="section-title">
+        ⚡ NØV3X COMMAND CENTER
+      </div>
 
-      <!-- MEMBERS -->
+      <div class="cards">
 
-      <div
-        class="card"
-        onclick="goMembers()">
+        <div class="card" onclick="goChat()">
+          <div class="card-icon">💬</div>
+          <h3>Clan Chat</h3>
+          <p>
+            Private communication for NØV3X members.
+          </p>
+        </div>
 
-        <h3>
-          👥 MEMBERS
-        </h3>
 
-        <p>
-          View registered NOV3X
-          community members.
-        </p>
+        <div class="card" onclick="goMembers()">
+          <div class="card-icon">👥</div>
+          <h3>Members</h3>
+          <p>
+            View the NØV3X clan member directory.
+          </p>
+        </div>
+
+
+        <div class="card" onclick="goAnnouncements()">
+          <div class="card-icon">📢</div>
+          <h3>Announcements</h3>
+          <p>
+            Clan news, updates and important notices.
+          </p>
+        </div>
+
+
+        <div class="card" onclick="goScrimmage()">
+          <div class="card-icon">🎮</div>
+          <h3>Clan Scrimmage</h3>
+          <p>
+            Manage NØV3X scrimmage events and lineups.
+          </p>
+        </div>
+
+
+        <div class="card" onclick="goTeams()">
+          <div class="card-icon">📋</div>
+          <h3>Team / Lineup</h3>
+          <p>
+            Organize clan teams and player lineups.
+          </p>
+        </div>
+
+
+        <div class="card" onclick="goLeaderboard()">
+          <div class="card-icon">🏆</div>
+          <h3>Clan Leaderboard</h3>
+          <p>
+            Track NØV3X player and team performance.
+          </p>
+        </div>
 
       </div>
 
 
+      <!-- ADMIN SECTION -->
+      <div id="adminSection" class="admin-section">
 
-      <!-- SCRIMMAGE -->
+        <div class="section-title">
+          👑 ADMIN CONTROL
+        </div>
 
-      <div
-        class="card"
-        onclick="goScrimmage()">
+        <div class="admin-card">
 
-        <h3>
-          🎮 SCRIMMAGE
-        </h3>
+          <h3>Clan Administration</h3>
 
-        <p>
-          Manage CODM scrimmages,
-          rooms and slots.
-        </p>
+          <p>
+            Manage NØV3X members, approvals, announcements,
+            scrimmages, teams and leaderboard data.
+          </p>
 
-      </div>
+          <button
+            class="logout"
+            style="margin-top:15px;"
+            onclick="goAdmin()"
+          >
+            OPEN ADMIN PANEL
+          </button>
 
-
-
-      <!-- LEADERBOARD -->
-
-      <div
-        class="card"
-        onclick="goLeaderboard()">
-
-        <h3>
-          🏆 LEADERBOARD
-        </h3>
-
-        <p>
-          View team scores,
-          rankings and points.
-        </p>
+        </div>
 
       </div>
-
-
-
-      <!-- TEAM LIST -->
-
-      <div
-        class="card"
-        onclick="goTeams()">
-
-        <h3>
-          📋 TEAM LIST
-        </h3>
-
-        <p>
-          Manage participating teams
-          and final team lists.
-        </p>
-
-      </div>
-
 
 
       <!-- STATUS -->
-
-      <div class="card">
-
-        <h3>
-          🟢 SYSTEM STATUS
-        </h3>
-
-        <p>
-          NOV3X COMS Firebase connection
-          is active.
-        </p>
-
-        <p class="status">
-          ● ONLINE
-        </p>
-
+      <div class="status">
+        ● NØV3X Firebase Connected
       </div>
 
+    </main>
 
-    </div>
+  </div>
 
 
-  </main>
+  <!-- FIREBASE -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
+  <script src="firebase-config.js"></script>
 
-</div>
 
+  <script>
 
+    let currentUser = null;
 
-<!-- FIREBASE -->
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    /* AUTH CHECK */
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    auth.onAuthStateChanged(async function(user) {
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
 
-<script src="firebase-config.js"></script>
+      currentUser = user;
 
+      try {
 
+        const doc = await db
+          .collection("users")
+          .doc(user.uid)
+          .get();
 
-<script>
+        if (!doc.exists) {
 
+          console.log("User profile not found.");
 
-/* CHECK LOGIN */
+          window.location.href = "index.html";
 
-auth.onAuthStateChanged(async function(user) {
+          return;
+        }
 
 
-  if (!user) {
+        const data = doc.data();
 
-    window.location.href =
-      "index.html";
 
-    return;
+        /* USERNAME */
 
-  }
+        document.getElementById("username").textContent =
+          data.username || "MEMBER";
 
 
-  try {
+        /* ROLE */
 
+        const role = data.role || "member";
 
-    const userDoc =
-      await db
-        .collection("users")
-        .doc(user.uid)
-        .get();
+        const roleBadge =
+          document.getElementById("roleBadge");
 
+        if (role === "admin") {
 
-    if (userDoc.exists) {
+          roleBadge.textContent = "ADMIN";
 
+          roleBadge.classList.add("admin");
 
-      const data =
-        userDoc.data();
 
+          /* SHOW ADMIN NAV */
 
-      document
-        .getElementById("welcome")
-        .textContent =
-        "Welcome, " +
-        (data.username || "User") +
-        "!";
+          document.getElementById("adminNav")
+            .style.display = "block";
 
 
-    }
+          /* SHOW ADMIN SECTION */
 
+          document.getElementById("adminSection")
+            .classList.add("show");
 
-  } catch (error) {
+        }
 
+        else {
 
-    console.error(
-      "User loading error:",
-      error
-    );
+          roleBadge.textContent = "NØV3X MEMBER";
 
+        }
 
-  }
+      }
 
+      catch (error) {
 
-});
+        console.error(
+          "User profile error:",
+          error
+        );
 
-
-
-/* NAVIGATION */
-
-
-function goHome() {
-
-  window.location.href =
-    "home.html";
-
-}
-
-
-function goChat() {
-
-  window.location.href =
-    "chat.html";
-
-}
-
-
-function goMembers() {
-
-  window.location.href =
-    "members.html";
-
-}
-
-
-function goScrimmage() {
-
-  window.location.href =
-    "scrimmage.html";
-
-}
-
-
-function goTeams() {
-
-  window.location.href =
-    "teams.html";
-
-}
-
-
-function goLeaderboard() {
-
-  window.location.href =
-    "leaderboard.html";
-
-}
-
-
-
-/* LOGOUT */
-
-function logout() {
-
-
-  auth.signOut()
-
-    .then(function() {
-
-      window.location.href =
-        "index.html";
-
-    })
-
-    .catch(function(error) {
-
-      console.error(
-        "Logout error:",
-        error
-      );
+      }
 
     });
 
 
-}
+    /* NAVIGATION */
 
-</script>
+    function goHome() {
+      window.location.href = "home.html";
+    }
 
+
+    function goChat() {
+      window.location.href = "chat.html";
+    }
+
+
+    function goMembers() {
+      window.location.href = "members.html";
+    }
+
+
+    function goAnnouncements() {
+      window.location.href = "announcements.html";
+    }
+
+
+    function goScrimmage() {
+      window.location.href = "scrimmage.html";
+    }
+
+
+    function goTeams() {
+      window.location.href = "teams.html";
+    }
+
+
+    function goLeaderboard() {
+      window.location.href = "leaderboard.html";
+    }
+
+
+    function goAdmin() {
+      window.location.href = "admin.html";
+    }
+
+
+    /* LOGOUT */
+
+    function logout() {
+
+      auth.signOut()
+        .then(function() {
+
+          window.location.href =
+            "index.html";
+
+        })
+
+        .catch(function(error) {
+
+          console.error(
+            "Logout error:",
+            error
+          );
+
+        });
+
+    }
+
+  </script>
 
 </body>
 </html>
