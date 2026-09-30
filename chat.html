@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>NØV3X COMS - Chat</title>
 
   <style>
@@ -21,13 +22,15 @@
       flex-direction: column;
     }
 
-    .topbar {
+    header {
       height: 65px;
       background: #12051f;
       border-bottom: 1px solid #7b2cff;
+
       display: flex;
       align-items: center;
       justify-content: space-between;
+
       padding: 0 18px;
     }
 
@@ -40,36 +43,35 @@
 
     .back {
       background: #24103b;
-      color: white;
       border: 1px solid #7b2cff;
+      color: white;
       padding: 9px 14px;
       border-radius: 7px;
       cursor: pointer;
     }
 
-    .chat {
+    .chat-container {
       flex: 1;
       display: flex;
       flex-direction: column;
-      max-width: 900px;
       width: 100%;
+      max-width: 900px;
       margin: auto;
-      overflow: hidden;
     }
 
-    .chat-header {
+    .chat-title {
       padding: 18px;
       border-bottom: 1px solid #29133d;
     }
 
-    .chat-header h2 {
+    .chat-title h2 {
       color: #c88aff;
     }
 
-    .chat-header p {
+    .chat-title p {
       color: #777;
-      font-size: 13px;
       margin-top: 5px;
+      font-size: 13px;
     }
 
     #messages {
@@ -86,30 +88,29 @@
       margin-bottom: 10px;
     }
 
-    .username {
+    .name {
       color: #b76cff;
       font-weight: bold;
-      font-size: 14px;
     }
 
-    .text {
-      color: #eee;
+    .message-text {
       margin-top: 5px;
-      word-wrap: break-word;
+      color: #eee;
+      word-break: break-word;
     }
 
     .time {
+      margin-top: 5px;
       color: #666;
       font-size: 10px;
-      margin-top: 5px;
     }
 
     .input-area {
       display: flex;
       gap: 8px;
       padding: 15px;
-      border-top: 1px solid #29133d;
       background: #0e0618;
+      border-top: 1px solid #29133d;
     }
 
     #messageInput {
@@ -132,8 +133,8 @@
       border: none;
       padding: 0 20px;
       border-radius: 8px;
-      cursor: pointer;
       font-weight: bold;
+      cursor: pointer;
     }
 
     #sendButton:hover {
@@ -144,193 +145,286 @@
 
 <body>
 
-  <header class="topbar">
-    <div class="logo">NØV3X COMS</div>
+<header>
 
-    <button class="back" onclick="goHome()">
-      ← Dashboard
+  <div class="logo">
+    NØV3X COMS
+  </div>
+
+  <button class="back" onclick="goHome()">
+    ← Dashboard
+  </button>
+
+</header>
+
+
+<div class="chat-container">
+
+  <div class="chat-title">
+
+    <h2>💬 Community Chat</h2>
+
+    <p>
+      NOV3X member communication
+    </p>
+
+  </div>
+
+
+  <div id="messages">
+
+    <p style="color:#777;">
+      Connecting to chat...
+    </p>
+
+  </div>
+
+
+  <div class="input-area">
+
+    <input
+      id="messageInput"
+      type="text"
+      maxlength="500"
+      placeholder="Type a message..."
+      autocomplete="off"
+    >
+
+    <button id="sendButton">
+      SEND
     </button>
-  </header>
 
-  <main class="chat">
+  </div>
 
-    <div class="chat-header">
-      <h2>💬 Community Chat</h2>
-      <p>Talk with NOV3X members</p>
-    </div>
+</div>
 
-    <div id="messages">
-      <p style="color:#777;">Loading messages...</p>
-    </div>
 
-    <div class="input-area">
-      <input
-        id="messageInput"
-        type="text"
-        placeholder="Type a message..."
-        maxlength="500"
-        autocomplete="off"
-      >
+<!-- FIREBASE -->
 
-      <button id="sendButton" onclick="sendMessage()">
-        SEND
-      </button>
-    </div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 
-  </main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
-  <!-- FIREBASE -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-  <script src="firebase-config.js"></script>
+<script src="firebase-config.js"></script>
 
-  <script>
 
-    let currentUser = null;
-    let username = "User";
+<script>
 
-    auth.onAuthStateChanged(async (user) => {
+let currentUser = null;
+let currentUsername = "User";
 
-      if (!user) {
-        window.location.href = "index.html";
-        return;
-      }
 
-      currentUser = user;
+auth.onAuthStateChanged(async function(user) {
 
-      try {
+  if (!user) {
 
-        const userDoc = await db
-          .collection("users")
-          .doc(user.uid)
-          .get();
+    window.location.href = "index.html";
 
-        if (userDoc.exists) {
-          username = userDoc.data().username || "User";
-        }
+    return;
 
-        loadMessages();
+  }
 
-      } catch (error) {
+  currentUser = user;
+
+
+  try {
+
+    const userDoc = await db
+      .collection("users")
+      .doc(user.uid)
+      .get();
+
+
+    if (userDoc.exists) {
+
+      currentUsername =
+        userDoc.data().username || "User";
+
+    }
+
+
+    loadMessages();
+
+  } catch (error) {
+
+    console.error(error);
+
+    document.getElementById("messages").innerHTML =
+      "<p style='color:#ff5555;'>Could not load your account.</p>";
+
+  }
+
+});
+
+
+function loadMessages() {
+
+  db.collection("messages")
+    .orderBy("createdAt", "asc")
+    .limitToLast(100)
+    .onSnapshot(
+
+      function(snapshot) {
+
+        const messages =
+          document.getElementById("messages");
+
+        messages.innerHTML = "";
+
+
+        snapshot.forEach(function(doc) {
+
+          const data = doc.data();
+
+
+          const box =
+            document.createElement("div");
+
+          box.className = "message";
+
+
+          const name =
+            document.createElement("div");
+
+          name.className = "name";
+
+          name.textContent =
+            data.username || "User";
+
+
+          const text =
+            document.createElement("div");
+
+          text.className = "message-text";
+
+          text.textContent =
+            data.text || "";
+
+
+          const time =
+            document.createElement("div");
+
+          time.className = "time";
+
+
+          if (data.createdAt) {
+
+            time.textContent =
+              data.createdAt
+                .toDate()
+                .toLocaleString();
+
+          }
+
+
+          box.appendChild(name);
+          box.appendChild(text);
+          box.appendChild(time);
+
+          messages.appendChild(box);
+
+        });
+
+
+        messages.scrollTop =
+          messages.scrollHeight;
+
+      },
+
+      function(error) {
 
         console.error(error);
 
+        document.getElementById("messages").innerHTML =
+          "<p style='color:#ff5555;'>Chat connection error.</p>";
+
       }
+
+    );
+
+}
+
+
+async function sendMessage() {
+
+  const input =
+    document.getElementById("messageInput");
+
+  const text =
+    input.value.trim();
+
+
+  if (!text || !currentUser) {
+
+    return;
+
+  }
+
+
+  input.disabled = true;
+
+
+  try {
+
+    await db.collection("messages").add({
+
+      uid: currentUser.uid,
+
+      username: currentUsername,
+
+      text: text,
+
+      createdAt:
+        firebase.firestore.FieldValue.serverTimestamp()
 
     });
 
 
-    function loadMessages() {
+    input.value = "";
 
-      db.collection("messages")
-        .orderBy("createdAt", "asc")
-        .limitToLast(100)
-        .onSnapshot((snapshot) => {
+  } catch (error) {
 
-          const messages = document.getElementById("messages");
+    console.error(error);
 
-          messages.innerHTML = "";
+    alert("Message could not be sent.");
 
-          snapshot.forEach((doc) => {
+  }
 
-            const data = doc.data();
 
-            const message = document.createElement("div");
-            message.className = "message";
+  input.disabled = false;
 
-            const name = document.createElement("div");
-            name.className = "username";
-            name.textContent = data.username || "User";
+  input.focus();
 
-            const text = document.createElement("div");
-            text.className = "text";
-            text.textContent = data.text || "";
+}
 
-            const time = document.createElement("div");
-            time.className = "time";
 
-            if (data.createdAt) {
-              time.textContent =
-                data.createdAt.toDate().toLocaleString();
-            }
+document
+  .getElementById("sendButton")
+  .addEventListener("click", sendMessage);
 
-            message.appendChild(name);
-            message.appendChild(text);
-            message.appendChild(time);
 
-            messages.appendChild(message);
+document
+  .getElementById("messageInput")
+  .addEventListener("keydown", function(event) {
 
-          });
+    if (event.key === "Enter") {
 
-          messages.scrollTop = messages.scrollHeight;
-
-        }, (error) => {
-
-          console.error("Chat error:", error);
-
-          document.getElementById("messages").innerHTML =
-            "<p style='color:#ff6666;'>Unable to load messages.</p>";
-
-        });
+      sendMessage();
 
     }
 
-
-    async function sendMessage() {
-
-      const input = document.getElementById("messageInput");
-      const text = input.value.trim();
-
-      if (!text || !currentUser) {
-        return;
-      }
-
-      input.disabled = true;
-
-      try {
-
-        await db.collection("messages").add({
-
-          uid: currentUser.uid,
-          username: username,
-          text: text,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-
-        });
-
-        input.value = "";
-
-      } catch (error) {
-
-        console.error("Send error:", error);
-
-        alert("Could not send message.");
-
-      }
-
-      input.disabled = false;
-      input.focus();
-
-    }
+  });
 
 
-    document.getElementById("messageInput")
-      .addEventListener("keydown", function(event) {
+function goHome() {
 
-        if (event.key === "Enter") {
-          sendMessage();
-        }
+  window.location.href = "home.html";
 
-      });
+}
 
-
-    function goHome() {
-      window.location.href = "home.html";
-    }
-
-  </script>
+</script>
 
 </body>
 </html>
