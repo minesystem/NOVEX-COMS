@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>NØV3X COMS - Voice Room</title>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <script src="firebase-config.js"></script>
+</head>
+
+<body>
+
+<div class="app">
+
+  <header>
+    <div>
+      <h1>🔊 NØV3X VOICE</h1>
+      <p>Private Clan Voice Room</p>
+    </div>
+
+    <button onclick="goHome()">🏠 Dashboard</button>
+  </header>
+
+
+  <main>
+
+    <section class="voice-card">
+
+      <div class="status">
+        <span id="statusDot"></span>
+        <span id="statusText">Disconnected</span>
+      </div>
+
+      <div class="mic">
+        🎙️
+      </div>
+
+      <h2>NØV3X VOICE ROOM</h2>
+
+      <p id="voiceMessage">
+        Join the private clan voice room.
+      </p>
+
+
+      <div class="controls">
+
+        <button
+          id="joinBtn"
+          class="join"
+          onclick="joinVoice()"
+        >
+          🎙️ JOIN VOICE
+        </button>
+
+        <button
+          id="muteBtn"
+          class="control"
+          onclick="toggleMute()"
+          disabled
+        >
+          🔇 MUTE
+        </button>
+
+        <button
+          id="leaveBtn"
+          class="leave"
+          onclick="leaveVoice()"
+          disabled
+        >
+          📞 LEAVE
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <section class="members-card">
+
+      <h2>👥 IN VOICE</h2>
+
+      <div id="voiceMembers">
+        <div class="empty">
+          Nobody is in the voice room.
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+
+<script>
+
+let currentUser = null;
+let currentUserData = null;
+
+let localStream = null;
+let isMuted = false;
+let joined = false;
+
+
+// =====================================
+// AUTH
+// =====================================
+
+auth.onAuthStateChanged(async function(user) {
+
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  currentUser = user;
+
+  try {
+
+    const userDoc = await db
+      .collection("users")
+      .doc(user.uid)
+      .get();
+
+    if (!userDoc.exists) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    currentUserData = userDoc.data();
+
+    if (currentUserData.approved !== true) {
+      window.location.href = "pending.html";
+      return;
+    }
+
+    listenForMembers();
+
+  } catch (error) {
+
+    console.error(error);
+
+    document.getElementById("voiceMessage").textContent =
+      "Unable to load your account.";
+
+  }
+
+});
+
+
+// =====================================
+// JOIN VOICE
+// =====================================
+
+async function joinVoice() {
+
+  if (joined) return;
+
+  try {
+
+    document.getElementById("voiceMessage").textContent =
+      "Requesting microphone permission...";
+
+
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: false
+    });
+
+
+    joined = true;
+    isMuted = false;
+
+
+    await db
+      .collection("voiceRoom")
+      .doc(currentUser.uid)
+      .set({
+
+        username:
+          currentUserData.username || "Member",
+
+        uid:
+          currentUser.uid,
+
+        joinedAt:
+          firebase.firestore.FieldValue.serverTimestamp(),
+
+        muted: false
+
+      });
+
+
+    updateUI();
+
+  } catch (error) {
+
+    console.error(error);
+
+    if (error.name === "NotAllowedError") {
+
+      document.getElementById("voiceMessage").textContent =
+        "Microphone permission was denied.";
+
+    } else {
+
+      document.getElementById("voiceMessage").textContent =
+        "Could not access your microphone.";
+
+    }
+
+  }
+
+}
+
+
+// =====================================
+// MUTE
+// =====================================
+
+async function toggleMute() {
+
+  if (!localStream) return;
+
+
+  isMuted = !isMuted;
+
+
+  localStream
+    .getAudioTracks()
+    .forEach(function(track) {
+
+      track.enabled = !isMuted;
+
+    });
+
+
+  await db
+    .collection("voiceRoom")
+    .doc(currentUser.uid)
+    .update({
+
+      muted: isMuted
+
+    });
+
+
+  updateUI();
+
+}
+
+
+// =====================================
+// LEAVE
+// =====================================
+
+async function leaveVoice() {
+
+  if (!joined) return;
+
+
+  try {
+
+    await db
+      .collection("voiceRoom")
+      .doc(currentUser.uid)
+      .delete();
+
+  } catch (error) {
+
+    console.error(error);
+
+  }
+
+
+  if (localStream) {
+
+    localStream
+      .getTracks()
+      .forEach(function(track) {
+
+        track.stop();
+
+      });
+
+    localStream = null;
+
+  }
+
+
+  joined = false;
+  isMuted = false;
+
+  updateUI();
+
+}
+
+
+// =====================================
+// LISTEN FOR MEMBERS
+// =====================================
+
+function listenForMembers() {
+
+  db.collection("voiceRoom")
+    .orderBy("joinedAt", "asc")
+    .onSnapshot(function(snapshot) {
+
+      const container =
+        document.getElementById("voiceMembers");
+
+      container.innerHTML = "";
+
+
+      if (snapshot.empty) {
+
+        container.innerHTML = `
+          <div class="empty">
+            Nobody is in the voice room.
+          </div>
+        `;
+
+        return;
+
+      }
+
+
+      snapshot.forEach(function(doc) {
+
+        const member = doc.data();
+
+        const div =
+          document.createElement("div");
+
+        div.className = "voice-member";
+
+
+        const mutedIcon =
+          member.muted ? "🔇" : "🎙️";
+
+
+        div.innerHTML = `
+
+          <div class="avatar">
+            🎮
+          </div>
+
+          <div class="member-info">
+
+            <strong>
+              ${escapeHTML(member.username)}
+            </strong>
+
+            <span>
+              ${member.uid === currentUser.uid
+                ? "You"
+                : "NØV3X Member"}
+            </span>
+
+          </div>
+
+          <div class="mic-status">
+            ${mutedIcon}
+          </div>
+
+        `;
+
+
+        container.appendChild(div);
+
+      });
+
+    });
+
+}
+
+
+// =====================================
+// UPDATE UI
+// =====================================
+
+function updateUI() {
+
+  const joinBtn =
+    document.getElementById("joinBtn");
+
+  const muteBtn =
+    document.getElementById("muteBtn");
+
+  const leaveBtn =
+    document.getElementById("leaveBtn");
+
+  const statusText =
+    document.getElementById("statusText");
+
+  const statusDot =
+    document.getElementById("statusDot");
+
+  const message =
+    document.getElementById("voiceMessage");
+
+
+  if (joined) {
+
+    joinBtn.disabled = true;
+
+    muteBtn.disabled = false;
+
+    leaveBtn.disabled = false;
+
+
+    statusText.textContent =
+      isMuted ? "Muted" : "Connected";
+
+    statusDot.className =
+      isMuted ? "muted-dot" : "connected-dot";
+
+
+    muteBtn.textContent =
+      isMuted ? "🎙️ UNMUTE" : "🔇 MUTE";
+
+
+    message.textContent =
+      isMuted
+        ? "Your microphone is muted."
+        : "You are connected to the voice room.";
+
+  } else {
+
+    joinBtn.disabled = false;
+
+    muteBtn.disabled = true;
+
+    leaveBtn.disabled = true;
+
+
+    statusText.textContent =
+      "Disconnected";
+
+    statusDot.className =
+      "disconnected-dot";
+
+
+    message.textContent =
+      "Join the private clan voice room.";
+
+  }
+
+}
+
+
+// =====================================
+// HOME
+// =====================================
+
+function goHome() {
+
+  window.location.href =
+    "home.html";
+
+}
+
+
+// =====================================
+// ESCAPE HTML
+// =====================================
+
+function escapeHTML(text) {
+
+  return String(text)
+
+    .replace(/&/g, "&amp;")
+
+    .replace(/</g, "&lt;")
+
+    .replace(/>/g, "&gt;")
+
+    .replace(/"/g, "&quot;")
+
+    .replace(/'/g, "&#039;");
+
+}
+
+
+// =====================================
+// CLEAN UP WHEN LEAVING PAGE
+// =====================================
+
+window.addEventListener(
+  "beforeunload",
+  function() {
+
+    if (localStream) {
+
+      localStream
+        .getTracks()
+        .forEach(function(track) {
+
+          track.stop();
+
+        });
+
+    }
+
+  }
+);
+
+</script>
+
+
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+
+body {
+
+  margin: 0;
+
+  min-height: 100vh;
+
+  font-family: Arial, sans-serif;
+
+  color: white;
+
+  background:
+    radial-gradient(
+      circle at top,
+      #421078,
+      #08030f 60%
+    );
+
+}
+
+
+.app {
+
+  width: 95%;
+
+  max-width: 900px;
+
+  margin: auto;
+
+  padding: 25px 0 50px;
+
+}
+
+
+header {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  gap: 15px;
+
+  margin-bottom: 25px;
+
+}
+
+
+header h1 {
+
+  margin: 0;
+
+  color: #dca8ff;
+
+}
+
+
+header p {
+
+  margin: 5px 0;
+
+  color: #999;
+
+}
+
+
+header button {
+
+  padding: 12px 18px;
+
+  border: 0;
+
+  border-radius: 10px;
+
+  background: #792cff;
+
+  color: white;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+}
+
+
+main {
+
+  display: grid;
+
+  gap: 20px;
+
+}
+
+
+.voice-card,
+.members-card {
+
+  background:
+    rgba(22, 8, 35, .95);
+
+  border: 1px solid #5b2785;
+
+  border-radius: 20px;
+
+  padding: 30px;
+
+  box-shadow:
+    0 0 30px rgba(125, 35, 255, .15);
+
+}
+
+
+.voice-card {
+
+  text-align: center;
+
+}
+
+
+.status {
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  gap: 8px;
+
+  color: #aaa;
+
+  margin-bottom: 20px;
+
+}
+
+
+#statusDot {
+
+  width: 10px;
+
+  height: 10px;
+
+  border-radius: 50%;
+
+  display: inline-block;
+
+}
+
+
+.connected-dot {
+
+  background: #53e68c;
+
+  box-shadow: 0 0 10px #53e68c;
+
+}
+
+
+.muted-dot {
+
+  background: #ffb347;
+
+}
+
+
+.disconnected-dot {
+
+  background: #777;
+
+}
+
+
+.mic {
+
+  width: 100px;
+
+  height: 100px;
+
+  margin: auto;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      #8e38ff,
+      #35105e
+    );
+
+  font-size: 45px;
+
+  box-shadow:
+    0 0 35px rgba(150, 50, 255, .45);
+
+}
+
+
+.voice-card h2 {
+
+  margin-bottom: 5px;
+
+}
+
+
+.voice-card p {
+
+  color: #aaa;
+
+}
+
+
+.controls {
+
+  display: flex;
+
+  justify-content: center;
+
+  flex-wrap: wrap;
+
+  gap: 10px;
+
+  margin-top: 25px;
+
+}
+
+
+.controls button {
+
+  border: 0;
+
+  border-radius: 10px;
+
+  padding: 13px 20px;
+
+  font-weight: bold;
+
+  color: white;
+
+  cursor: pointer;
+
+}
+
+
+.controls button:disabled {
+
+  opacity: .4;
+
+  cursor: not-allowed;
+
+}
+
+
+.join {
+
+  background: #7b2cff;
+
+}
+
+
+.control {
+
+  background: #402052;
+
+}
+
+
+.leave {
+
+  background: #9d244d;
+
+}
+
+
+.members-card h2 {
+
+  margin-top: 0;
+
+  color: #dca8ff;
+
+}
+
+
+.voice-member {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 13px;
+
+  padding: 13px;
+
+  margin: 9px 0;
+
+  background:
+    rgba(55, 20, 78, .65);
+
+  border: 1px solid #48205e;
+
+  border-radius: 12px;
+
+}
+
+
+.avatar {
+
+  width: 42px;
+
+  height: 42px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #35105e;
+
+}
+
+
+.member-info {
+
+  flex: 1;
+
+}
+
+
+.member-info strong {
+
+  display: block;
+
+}
+
+
+.member-info span {
+
+  color: #999;
+
+  font-size: 12px;
+
+}
+
+
+.mic-status {
+
+  font-size: 20px;
+
+}
+
+
+.empty {
+
+  text-align: center;
+
+  padding: 25px;
+
+  color: #888;
+
+}
+
+
+@media(max-width:600px) {
+
+  header {
+
+    flex-direction: column;
+
+    align-items: stretch;
+
+  }
+
+  header button {
+
+    width: 100%;
+
+  }
+
+  .voice-card,
+  .members-card {
+
+    padding: 20px;
+
+  }
+
+}
+
+</style>
+
+</body>
+  </html>
