@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>NØV3X COMS</title>
 
   <style>
@@ -19,13 +20,17 @@
       min-height: 100vh;
     }
 
+    /* TOP BAR */
+
     .topbar {
       height: 65px;
       background: #12051f;
       border-bottom: 1px solid #7b2cff;
+
       display: flex;
       align-items: center;
       justify-content: space-between;
+
       padding: 0 20px;
     }
 
@@ -40,58 +45,97 @@
       background: #7b2cff;
       color: white;
       border: none;
+
       padding: 10px 16px;
+
       border-radius: 7px;
+
       cursor: pointer;
       font-weight: bold;
     }
+
+    .logout:hover {
+      background: #9850ff;
+    }
+
+
+    /* LAYOUT */
 
     .layout {
       display: flex;
       min-height: calc(100vh - 65px);
     }
 
+
+    /* SIDEBAR */
+
     .sidebar {
-      width: 220px;
+      width: 225px;
+
       background: #0e0618;
+
       border-right: 1px solid #29133d;
+
       padding: 20px 12px;
     }
 
     .section-title {
       color: #777;
+
       font-size: 11px;
+
       margin: 10px;
+
       letter-spacing: 1px;
     }
 
     .nav-btn {
       width: 100%;
+
       padding: 13px;
+
       margin-bottom: 7px;
+
       background: transparent;
+
       border: none;
+
       color: #ccc;
+
       text-align: left;
+
       border-radius: 7px;
+
       cursor: pointer;
+
       font-size: 14px;
+
+      transition: 0.2s;
     }
 
     .nav-btn:hover {
       background: #24103b;
+
       color: #c88aff;
     }
 
-    .active {
+    .nav-btn.active {
       background: #24103b;
+
       color: #c88aff;
     }
+
+
+    /* MAIN */
 
     .main {
       flex: 1;
+
       padding: 25px;
     }
+
+
+    /* WELCOME */
 
     .welcome {
       margin-bottom: 25px;
@@ -99,6 +143,7 @@
 
     .welcome h1 {
       font-size: 28px;
+
       margin-bottom: 7px;
     }
 
@@ -106,36 +151,65 @@
       color: #888;
     }
 
+
+    /* CARDS */
+
     .cards {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+
+      grid-template-columns:
+        repeat(3, 1fr);
+
       gap: 15px;
     }
 
     .card {
       background: #11071c;
+
       border: 1px solid #29133d;
+
       border-radius: 12px;
+
       padding: 20px;
-      min-height: 130px;
+
+      min-height: 140px;
+
+      cursor: pointer;
+
+      transition: 0.2s;
+    }
+
+    .card:hover {
+      border-color: #7b2cff;
+
+      transform: translateY(-2px);
     }
 
     .card h3 {
       color: #b76cff;
+
       margin-bottom: 12px;
     }
 
     .card p {
       color: #999;
+
       font-size: 14px;
+
+      line-height: 1.5;
     }
 
     .status {
       color: #55e88a !important;
+
       margin-top: 15px;
     }
 
+
+    /* MOBILE */
+
     @media (max-width: 750px) {
+
       .sidebar {
         width: 70px;
       }
@@ -146,6 +220,7 @@
 
       .nav-btn {
         font-size: 0;
+
         text-align: center;
       }
 
@@ -160,213 +235,417 @@
       .main {
         padding: 18px;
       }
+
+      .welcome h1 {
+        font-size: 24px;
+      }
     }
+
   </style>
 </head>
 
+
 <body>
 
-  <header class="topbar">
 
-    <div class="logo">
-      NØV3X COMS
+<!-- TOP BAR -->
+
+<header class="topbar">
+
+  <div class="logo">
+    NØV3X COMS
+  </div>
+
+  <button
+    class="logout"
+    onclick="logout()">
+
+    LOGOUT
+
+  </button>
+
+</header>
+
+
+
+<div class="layout">
+
+
+  <!-- SIDEBAR -->
+
+  <aside class="sidebar">
+
+
+    <div class="section-title">
+      MAIN
     </div>
 
-    <button class="logout" onclick="logout()">
-      LOGOUT
+
+    <button
+      class="nav-btn active"
+      onclick="goHome()">
+
+      🏠 Dashboard
+
     </button>
 
-  </header>
+
+    <button
+      class="nav-btn"
+      onclick="goChat()">
+
+      💬 Chat
+
+    </button>
 
 
-  <div class="layout">
+    <button
+      class="nav-btn"
+      onclick="goMembers()">
 
-    <aside class="sidebar">
+      👥 Members
 
-      <div class="section-title">
-        MAIN
-      </div>
+    </button>
 
-      <button
-        class="nav-btn active"
-        onclick="goHome()">
-        🏠 Dashboard
-      </button>
 
-      <button
-        class="nav-btn"
+
+    <div class="section-title">
+      COMMUNITY
+    </div>
+
+
+    <button
+      class="nav-btn"
+      onclick="goScrimmage()">
+
+      🎮 Scrimmage
+
+    </button>
+
+
+    <button
+      class="nav-btn"
+      onclick="goTeams()">
+
+      📋 Team List
+
+    </button>
+
+
+    <button
+      class="nav-btn"
+      onclick="goLeaderboard()">
+
+      🏆 Leaderboard
+
+    </button>
+
+
+  </aside>
+
+
+
+  <!-- MAIN CONTENT -->
+
+  <main class="main">
+
+
+    <div class="welcome">
+
+      <h1 id="welcome">
+        Welcome!
+      </h1>
+
+      <p>
+        Welcome to the NOV3X COMS community.
+      </p>
+
+    </div>
+
+
+
+    <div class="cards">
+
+
+      <!-- CHAT -->
+
+      <div
+        class="card"
         onclick="goChat()">
-        💬 Chat
-      </button>
 
-      <button
-        class="nav-btn"
-        onclick="alert('Members page coming next!')">
-        👥 Members
-      </button>
-
-
-      <div class="section-title">
-        COMMUNITY
-      </div>
-
-      <button
-        class="nav-btn"
-        onclick="alert('Scrimmage page coming next!')">
-        🎮 Scrimmage
-      </button>
-
-      <button
-        class="nav-btn"
-        onclick="alert('Team List coming next!')">
-        📋 Team List
-      </button>
-
-      <button
-        class="nav-btn"
-        onclick="alert('Leaderboard coming next!')">
-        🏆 Leaderboard
-      </button>
-
-    </aside>
-
-
-    <main class="main">
-
-      <div class="welcome">
-
-        <h1 id="welcome">
-          Welcome!
-        </h1>
+        <h3>
+          💬 CHAT
+        </h3>
 
         <p>
-          Welcome to the NOV3X COMS community.
+          Talk with other NOV3X members
+          through the community chat.
         </p>
 
       </div>
 
 
-      <div class="cards">
 
-        <div class="card">
-          <h3>💬 CHAT</h3>
-          <p>
-            Talk with other NOV3X members.
-          </p>
-        </div>
+      <!-- MEMBERS -->
 
-        <div class="card">
-          <h3>👥 MEMBERS</h3>
-          <p>
-            View community members.
-          </p>
-        </div>
+      <div
+        class="card"
+        onclick="goMembers()">
 
-        <div class="card">
-          <h3>🎮 SCRIMMAGE</h3>
-          <p>
-            Manage teams and scrimmage slots.
-          </p>
-        </div>
+        <h3>
+          👥 MEMBERS
+        </h3>
 
-        <div class="card">
-          <h3>🏆 LEADERBOARD</h3>
-          <p>
-            View team rankings and scores.
-          </p>
-        </div>
-
-        <div class="card">
-          <h3>📋 TEAM LIST</h3>
-          <p>
-            Manage participating teams.
-          </p>
-        </div>
-
-        <div class="card">
-          <h3>🟢 STATUS</h3>
-          <p class="status">
-            Firebase Connected
-          </p>
-        </div>
+        <p>
+          View registered NOV3X
+          community members.
+        </p>
 
       </div>
 
-    </main>
-
-  </div>
 
 
-  <!-- FIREBASE -->
+      <!-- SCRIMMAGE -->
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+      <div
+        class="card"
+        onclick="goScrimmage()">
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+        <h3>
+          🎮 SCRIMMAGE
+        </h3>
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+        <p>
+          Manage CODM scrimmages,
+          rooms and slots.
+        </p>
 
-  <script src="firebase-config.js"></script>
+      </div>
 
 
-  <script>
 
-    auth.onAuthStateChanged(async function(user) {
+      <!-- LEADERBOARD -->
 
-      if (!user) {
-        window.location.href = "index.html";
-        return;
-      }
+      <div
+        class="card"
+        onclick="goLeaderboard()">
 
-      try {
+        <h3>
+          🏆 LEADERBOARD
+        </h3>
 
-        const userDoc = await db
-          .collection("users")
-          .doc(user.uid)
-          .get();
+        <p>
+          View team scores,
+          rankings and points.
+        </p>
 
-        if (userDoc.exists) {
+      </div>
 
-          const data = userDoc.data();
 
-          document.getElementById("welcome").textContent =
-            "Welcome, " + data.username + "!";
 
-        }
+      <!-- TEAM LIST -->
 
-      } catch (error) {
+      <div
+        class="card"
+        onclick="goTeams()">
 
-        console.error(error);
+        <h3>
+          📋 TEAM LIST
+        </h3>
 
-      }
+        <p>
+          Manage participating teams
+          and final team lists.
+        </p>
+
+      </div>
+
+
+
+      <!-- STATUS -->
+
+      <div class="card">
+
+        <h3>
+          🟢 SYSTEM STATUS
+        </h3>
+
+        <p>
+          NOV3X COMS Firebase connection
+          is active.
+        </p>
+
+        <p class="status">
+          ● ONLINE
+        </p>
+
+      </div>
+
+
+    </div>
+
+
+  </main>
+
+
+</div>
+
+
+
+<!-- FIREBASE -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script src="firebase-config.js"></script>
+
+
+
+<script>
+
+
+/* CHECK LOGIN */
+
+auth.onAuthStateChanged(async function(user) {
+
+
+  if (!user) {
+
+    window.location.href =
+      "index.html";
+
+    return;
+
+  }
+
+
+  try {
+
+
+    const userDoc =
+      await db
+        .collection("users")
+        .doc(user.uid)
+        .get();
+
+
+    if (userDoc.exists) {
+
+
+      const data =
+        userDoc.data();
+
+
+      document
+        .getElementById("welcome")
+        .textContent =
+        "Welcome, " +
+        (data.username || "User") +
+        "!";
+
+
+    }
+
+
+  } catch (error) {
+
+
+    console.error(
+      "User loading error:",
+      error
+    );
+
+
+  }
+
+
+});
+
+
+
+/* NAVIGATION */
+
+
+function goHome() {
+
+  window.location.href =
+    "home.html";
+
+}
+
+
+function goChat() {
+
+  window.location.href =
+    "chat.html";
+
+}
+
+
+function goMembers() {
+
+  window.location.href =
+    "members.html";
+
+}
+
+
+function goScrimmage() {
+
+  window.location.href =
+    "scrimmage.html";
+
+}
+
+
+function goTeams() {
+
+  window.location.href =
+    "teams.html";
+
+}
+
+
+function goLeaderboard() {
+
+  window.location.href =
+    "leaderboard.html";
+
+}
+
+
+
+/* LOGOUT */
+
+function logout() {
+
+
+  auth.signOut()
+
+    .then(function() {
+
+      window.location.href =
+        "index.html";
+
+    })
+
+    .catch(function(error) {
+
+      console.error(
+        "Logout error:",
+        error
+      );
 
     });
 
 
-    function goHome() {
-      window.location.href = "home.html";
-    }
+}
 
+</script>
 
-    function goChat() {
-      window.location.href = "chat.html";
-    }
-
-
-    function logout() {
-
-      auth.signOut().then(function() {
-
-        window.location.href = "index.html";
-
-      }).catch(function(error) {
-
-        console.error("Logout error:", error);
-
-      });
-
-    }
-
-  </script>
 
 </body>
 </html>
