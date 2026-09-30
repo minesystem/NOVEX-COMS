@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>NØV3X Admin Panel</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #09070f;
+      color: white;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      height: 65px;
+      background: #110d1d;
+      border-bottom: 1px solid #7b2cff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+
+    .logo {
+      color: #bd75ff;
+      font-size: 21px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    .back {
+      background: #251536;
+      color: white;
+      border: 1px solid #7130a8;
+      padding: 9px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .main {
+      max-width: 1200px;
+      margin: auto;
+      padding: 25px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #160d24, #28103e);
+      border: 1px solid #722fc2;
+      border-radius: 14px;
+      padding: 25px;
+      margin-bottom: 25px;
+    }
+
+    .header h1 {
+      color: #c37cff;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: #aaa;
+    }
+
+    .admin-badge {
+      display: inline-block;
+      margin-top: 12px;
+      background: #3a270b;
+      color: #ffd166;
+      padding: 7px 11px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .section {
+      background: #110d19;
+      border: 1px solid #2b193d;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .section h2 {
+      color: #c27aff;
+      margin-bottom: 15px;
+    }
+
+    .member {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      background: #17111f;
+      border: 1px solid #2b1b3b;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .member-name {
+      font-weight: bold;
+    }
+
+    .member-email {
+      color: #888;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .member-status {
+      color: #65e28c;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    .pending {
+      color: #ffd166;
+    }
+
+    .actions {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .approve {
+      background: #246b3c;
+      color: white;
+      border: none;
+      padding: 8px 11px;
+      border-radius: 6px;
+    }
+
+    .reject {
+      background: #7b2735;
+      color: white;
+      border: none;
+      padding: 8px 11px;
+      border-radius: 6px;
+    }
+
+    .admin {
+      background: #704b12;
+      color: white;
+      border: none;
+      padding: 8px 11px;
+      border-radius: 6px;
+    }
+
+    .member-btn {
+      background: #36204e;
+      color: white;
+      border: none;
+      padding: 8px 11px;
+      border-radius: 6px;
+    }
+
+    .announcement-box {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      background: #0b0810;
+      color: white;
+      border: 1px solid #38224d;
+      border-radius: 8px;
+      padding: 12px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: #8c3cff;
+    }
+
+    .publish {
+      background: #7b2cff;
+      color: white;
+      border: none;
+      padding: 11px 15px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    .publish:hover {
+      background: #994fff;
+    }
+
+    .announcement {
+      background: #17111f;
+      border-left: 3px solid #8a3cff;
+      padding: 14px;
+      margin-top: 10px;
+      border-radius: 7px;
+    }
+
+    .announcement-title {
+      font-weight: bold;
+      color: #d09aff;
+    }
+
+    .announcement-text {
+      color: #bbb;
+      margin-top: 6px;
+      white-space: pre-wrap;
+    }
+
+    .announcement-date {
+      color: #777;
+      font-size: 11px;
+      margin-top: 8px;
+    }
+
+    .danger {
+      border-color: #6e2631;
+    }
+
+    .danger h2 {
+      color: #ff7280;
+    }
+
+    .message {
+      padding: 10px;
+      border-radius: 7px;
+      margin-bottom: 15px;
+      display: none;
+    }
+
+    .success {
+      background: #102a18;
+      color: #72e59a;
+      border: 1px solid #245c35;
+    }
+
+    .error {
+      background: #2b1116;
+      color: #ff7b88;
+      border: 1px solid #6b2731;
+    }
+
+    @media (max-width: 700px) {
+      .main {
+        padding: 15px;
+      }
+
+      .member {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .actions {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="topbar">
+    <div class="logo">NØV3X COMS</div>
+
+    <button class="back" onclick="goHome()">
+      ← DASHBOARD
+    </button>
+  </div>
+
+
+  <main class="main">
+
+    <div class="header">
+      <h1>👑 ADMIN PANEL</h1>
+
+      <p>
+        NØV3X private clan administration and management.
+      </p>
+
+      <div class="admin-badge">
+        ADMIN CONTROL
+      </div>
+    </div>
+
+
+    <div id="message" class="message"></div>
+
+
+    <!-- MEMBERS -->
+
+    <div class="section">
+
+      <h2>👥 MEMBER MANAGEMENT</h2>
+
+      <div id="members">
+        Loading members...
+      </div>
+
+    </div>
+
+
+    <!-- ANNOUNCEMENTS -->
+
+    <div class="section">
+
+      <h2>📢 CLAN ANNOUNCEMENT</h2>
+
+      <div class="announcement-box">
+
+        <input
+          type="text"
+          id="announcementTitle"
+          placeholder="Announcement title"
+        >
+
+        <textarea
+          id="announcementText"
+          placeholder="Write your clan announcement..."
+        ></textarea>
+
+        <button
+          class="publish"
+          onclick="publishAnnouncement()"
+        >
+          📢 PUBLISH ANNOUNCEMENT
+        </button>
+
+      </div>
+
+      <div id="announcements">
+        Loading announcements...
+      </div>
+
+    </div>
+
+
+    <!-- CLAN CONTROLS -->
+
+    <div class="section">
+
+      <h2>⚙️ CLAN CONTROLS</h2>
+
+      <p style="color:#999; line-height:1.6;">
+        Use this panel to control NØV3X members and
+        clan announcements. Scrimmage, team lineups,
+        and leaderboard management will be connected
+        to this panel next.
+      </p>
+
+    </div>
+
+
+  </main>
+
+
+  <!-- FIREBASE -->
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <script src="firebase-config.js"></script>
+
+
+  <script>
+
+    let currentUser = null;
+
+
+    /* =========================
+       AUTH + ADMIN CHECK
+    ========================= */
+
+    auth.onAuthStateChanged(async function(user) {
+
+      if (!user) {
+
+        window.location.href = "index.html";
+
+        return;
+      }
+
+      currentUser = user;
+
+      try {
+
+        const doc = await db
+          .collection("users")
+          .doc(user.uid)
+          .get();
+
+        if (!doc.exists) {
+
+          window.location.href = "home.html";
+
+          return;
+        }
+
+        const data = doc.data();
+
+        if (data.role !== "admin") {
+
+          alert("Admin access only.");
+
+          window.location.href = "home.html";
+
+          return;
+        }
+
+        loadMembers();
+        loadAnnouncements();
+
+      }
+
+      catch (error) {
+
+        console.error(error);
+
+        alert("Unable to verify admin access.");
+
+        window.location.href = "home.html";
+
+      }
+
+    });
+
+
+    /* =========================
+       LOAD MEMBERS
+    ========================= */
+
+    function loadMembers() {
+
+      db.collection("users")
+        .orderBy("createdAt", "asc")
+        .onSnapshot(function(snapshot) {
+
+          const container =
+            document.getElementById("members");
+
+          container.innerHTML = "";
+
+          if (snapshot.empty) {
+
+            container.innerHTML =
+              "<p style='color:#888;'>No members found.</p>";
+
+            return;
+          }
+
+
+          snapshot.forEach(function(doc) {
+
+            const user = doc.data();
+
+            const div =
+              document.createElement("div");
+
+            div.className = "member";
+
+
+            const approved =
+              user.approved === true;
+
+            const role =
+              user.role || "member";
+
+
+            div.innerHTML = `
+
+              <div>
+
+                <div class="member-name">
+                  ${escapeHTML(user.username || "Unknown")}
+                </div>
+
+                <div class="member-email">
+                  ${escapeHTML(user.email || "")}
+                </div>
+
+                <div class="member-status ${
+                  approved ? "" : "pending"
+                }">
+
+                  ${
+                    approved
+                    ? "● APPROVED"
+                    : "● PENDING APPROVAL"
+                  }
+
+                  • ${role.toUpperCase()}
+
+                </div>
+
+              </div>
+
+
+              <div class="actions">
+
+                ${
+                  !approved
+                  ? `
+                    <button
+                      class="approve"
+                      onclick="approveMember('${doc.id}')"
+                    >
+                      ✓ APPROVE
+                    </button>
+                  `
+                  : ""
+                }
+
+
+                ${
+                  role !== "admin"
+                  ? `
+                    <button
+                      class="admin"
+                      onclick="makeAdmin('${doc.id}')"
+                    >
+                      👑 MAKE ADMIN
+                    </button>
+                  `
+                  : `
+                    <button
+                      class="member-btn"
+                      onclick="removeAdmin('${doc.id}')"
+                    >
+                      MEMBER ROLE
+                    </button>
+                  `
+                }
+
+              </div>
+
+            `;
+
+
+            container.appendChild(div);
+
+          });
+
+        }, function(error) {
+
+          console.error(error);
+
+          document.getElementById("members").innerHTML =
+            "<p style='color:#ff7180;'>Unable to load members. Check Firestore rules.</p>";
+
+        });
+
+    }
+
+
+    /* =========================
+       APPROVE MEMBER
+    ========================= */
+
+    async function approveMember(uid) {
+
+      try {
+
+        await db
+          .collection("users")
+          .doc(uid)
+          .update({
+            approved: true
+          });
+
+        showMessage(
+          "Member approved successfully.",
+          "success"
+        );
+
+      }
+
+      catch (error) {
+
+        console.error(error);
+
+        showMessage(
+          "Unable to approve member.",
+          "error"
+        );
+
+      }
+
+    }
+
+
+    /* =========================
+       MAKE ADMIN
+    ========================= */
+
+    async function makeAdmin(uid) {
+
+      const confirmAdmin =
+        confirm(
+          "Make this member an NØV3X admin?"
+        );
+
+      if (!confirmAdmin) return;
+
+
+      try {
+
+        await db
+          .collection("users")
+          .doc(uid)
+          .update({
+            role: "admin",
+            approved: true
+          });
+
+        showMessage(
+          "Member is now an admin.",
+          "success"
+        );
+
+      }
+
+      catch (error) {
+
+        console.error(error);
+
+        showMessage(
+          "Unable to change role.",
+          "error"
+        );
+
+      }
+
+    }
+
+
+    /* =========================
+       REMOVE ADMIN
+    ========================= */
+
+    async function removeAdmin(uid) {
+
+      const confirmRemove =
+        confirm(
+          "Change this admin back to a normal member?"
+        );
+
+      if (!confirmRemove) return;
+
+
+      try {
+
+        await db
+          .collection("users")
+          .doc(uid)
+          .update({
+            role: "member"
+          });
+
+        showMessage(
+          "Admin role removed.",
+          "success"
+        );
+
+      }
+
+      catch (error) {
+
+        console.error(error);
+
+        showMessage(
+          "Unable to change role.",
+          "error"
+        );
+
+      }
+
+    }
+
+
+    /* =========================
+       PUBLISH ANNOUNCEMENT
+    ========================= */
+
+    async function publishAnnouncement() {
+
+      const title =
+        document
+          .getElementById("announcementTitle")
+          .value
+          .trim();
+
+      const text =
+        document
+          .getElementById("announcementText")
+          .value
+          .trim();
+
+
+      if (!title || !text) {
+
+        showMessage(
+          "Enter a title and announcement.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      try {
+
+        await db
+          .collection("announcements")
+          .add({
+
+            title: title,
+
+            text: text,
+
+            authorUID: currentUser.uid,
+
+            createdAt:
+              firebase.firestore.FieldValue.serverTimestamp()
+
+          });
+
+
+        document
+          .getElementById("announcementTitle")
+          .value = "";
+
+        document
+          .getElementById("announcementText")
+          .value = "";
+
+
+        showMessage(
+          "Announcement published.",
+          "success"
+        );
+
+      }
+
+      catch (error) {
+
+        console.error(error);
+
+        showMessage(
+          "Unable to publish announcement.",
+          "error"
+        );
+
+      }
+
+    }
+
+
+    /* =========================
+       LOAD ANNOUNCEMENTS
+    ========================= */
+
+    function loadAnnouncements() {
+
+      db.collection("announcements")
+        .orderBy("createdAt", "desc")
+        .limit(20)
+        .onSnapshot(function(snapshot) {
+
+          const container =
+            document.getElementById("announcements");
+
+          container.innerHTML = "";
+
+
+          if (snapshot.empty) {
+
+            container.innerHTML =
+              "<p style='color:#888;margin-top:15px;'>No announcements yet.</p>";
+
+            return;
+          }
+
+
+          snapshot.forEach(function(doc) {
+
+            const data = doc.data();
+
+            const div =
+              document.createElement("div");
+
+            div.className =
+              "announcement";
+
+
+            let date = "";
+
+            if (data.createdAt) {
+
+              date =
+                data.createdAt
+                  .toDate()
+                  .toLocaleString();
+
+            }
+
+
+            div.innerHTML = `
+
+              <div class="announcement-title">
+                ${escapeHTML(data.title || "")}
+              </div>
+
+              <div class="announcement-text">
+                ${escapeHTML(data.text || "")}
+              </div>
+
+              <div class="announcement-date">
+                ${date}
+              </div>
+
+            `;
+
+
+            container.appendChild(div);
+
+          });
+
+        });
+
+    }
+
+
+    /* =========================
+       SECURITY HTML ESCAPE
+    ========================= */
+
+    function escapeHTML(text) {
+
+      const div =
+        document.createElement("div");
+
+      div.textContent = text;
+
+      return div.innerHTML;
+
+    }
+
+
+    /* =========================
+       MESSAGE
+    ========================= */
+
+    function showMessage(text, type) {
+
+      const box =
+        document.getElementById("message");
+
+      box.textContent = text;
+
+      box.className =
+        "message " + type;
+
+      box.style.display = "block";
+
+
+      setTimeout(function() {
+
+        box.style.display = "none";
+
+      }, 3000);
+
+    }
+
+
+    /* =========================
+       DASHBOARD
+    ========================= */
+
+    function goHome() {
+
+      window.location.href =
+        "home.html";
+
+    }
+
+  </script>
+
+</body>
+</html>
