@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>NØV3X COMS - Members</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #08030f;
+      color: white;
+      min-height: 100vh;
+    }
+
+    header {
+      height: 65px;
+      background: #12051f;
+      border-bottom: 1px solid #7b2cff;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 0 18px;
+    }
+
+    .logo {
+      color: #b76cff;
+      font-size: 21px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    .back {
+      background: #24103b;
+      border: 1px solid #7b2cff;
+      color: white;
+      padding: 9px 14px;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+
+    main {
+      max-width: 900px;
+      margin: auto;
+      padding: 25px 18px;
+    }
+
+    h1 {
+      color: #c88aff;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: #777;
+      margin-bottom: 25px;
+    }
+
+    #memberCount {
+      color: #888;
+      margin-bottom: 15px;
+    }
+
+    #members {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .member {
+      background: #11071c;
+      border: 1px solid #29133d;
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .member-name {
+      color: #b76cff;
+      font-size: 17px;
+      font-weight: bold;
+    }
+
+    .member-status {
+      color: #55e88a;
+      font-size: 12px;
+      margin-top: 7px;
+    }
+
+    .empty {
+      color: #777;
+      padding: 20px;
+    }
+
+    @media (max-width: 600px) {
+      #members {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+
+  <div class="logo">
+    NØV3X COMS
+  </div>
+
+  <button class="back" onclick="goHome()">
+    ← Dashboard
+  </button>
+
+</header>
+
+
+<main>
+
+  <h1>👥 Members</h1>
+
+  <p class="subtitle">
+    NOV3X COMS community members
+  </p>
+
+  <p id="memberCount">
+    Loading members...
+  </p>
+
+  <div id="members"></div>
+
+</main>
+
+
+<!-- FIREBASE -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script src="firebase-config.js"></script>
+
+
+<script>
+
+auth.onAuthStateChanged(function(user) {
+
+  if (!user) {
+
+    window.location.href = "index.html";
+
+    return;
+
+  }
+
+  loadMembers();
+
+});
+
+
+function loadMembers() {
+
+  db.collection("users")
+    .orderBy("createdAt", "asc")
+    .onSnapshot(
+
+      function(snapshot) {
+
+        const container =
+          document.getElementById("members");
+
+        const count =
+          document.getElementById("memberCount");
+
+        container.innerHTML = "";
+
+        count.textContent =
+          snapshot.size + " member" +
+          (snapshot.size === 1 ? "" : "s");
+
+
+        if (snapshot.empty) {
+
+          container.innerHTML =
+            "<p class='empty'>No members found.</p>";
+
+          return;
+
+        }
+
+
+        snapshot.forEach(function(doc) {
+
+          const data = doc.data();
+
+
+          const member =
+            document.createElement("div");
+
+          member.className = "member";
+
+
+          const name =
+            document.createElement("div");
+
+          name.className = "member-name";
+
+          name.textContent =
+            data.username || "Unknown User";
+
+
+          const status =
+            document.createElement("div");
+
+          status.className = "member-status";
+
+          status.textContent =
+            "● NOV3X MEMBER";
+
+
+          member.appendChild(name);
+
+          member.appendChild(status);
+
+          container.appendChild(member);
+
+        });
+
+      },
+
+      function(error) {
+
+        console.error(error);
+
+        document.getElementById("memberCount")
+          .textContent =
+          "Unable to load members.";
+
+      }
+
+    );
+
+}
+
+
+function goHome() {
+
+  window.location.href = "home.html";
+
+}
+
+</script>
+
+</body>
+</html>
