@@ -42,6 +42,8 @@
       text-align: center;
       color: #777;
       margin-bottom: 25px;
+      font-size: 13px;
+      letter-spacing: 1px;
     }
 
     .box {
@@ -115,16 +117,17 @@
       padding: 11px;
       border-radius: 7px;
       font-size: 13px;
+      line-height: 1.4;
     }
 
-    .error {
+    .message.error {
       display: block;
       background: #2b1116;
       border: 1px solid #6b2731;
       color: #ff7c88;
     }
 
-    .success {
+    .message.success {
       display: block;
       background: #102a18;
       border: 1px solid #245c35;
@@ -133,9 +136,10 @@
 
     .pending {
       text-align: center;
-      color: #aaa;
-      line-height: 1.6;
+      color: #888;
+      line-height: 1.5;
       margin-top: 15px;
+      font-size: 12px;
     }
 
     #registerForm {
@@ -143,11 +147,16 @@
     }
 
     .small {
-      color: #777;
+      color: #666;
       font-size: 11px;
       text-align: center;
       margin-top: 18px;
       line-height: 1.5;
+    }
+
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -166,6 +175,8 @@
 
 
     <div class="box">
+
+      <!-- TABS -->
 
       <div class="tabs">
 
@@ -188,7 +199,12 @@
       </div>
 
 
-      <div id="message" class="message"></div>
+      <!-- MESSAGE -->
+
+      <div
+        id="message"
+        class="message"
+      ></div>
 
 
       <!-- LOGIN -->
@@ -201,15 +217,18 @@
           type="email"
           id="loginEmail"
           placeholder="Email"
+          autocomplete="email"
         >
 
         <input
           type="password"
           id="loginPassword"
           placeholder="Password"
+          autocomplete="current-password"
         >
 
         <button
+          id="loginButton"
           class="main-btn"
           onclick="login()"
         >
@@ -229,27 +248,33 @@
           type="text"
           id="registerUsername"
           placeholder="Username"
+          maxlength="30"
+          autocomplete="nickname"
         >
 
         <input
           type="email"
           id="registerEmail"
           placeholder="Email"
+          autocomplete="email"
         >
 
         <input
           type="password"
           id="registerPassword"
           placeholder="Password"
+          autocomplete="new-password"
         >
 
         <input
           type="password"
           id="registerConfirm"
           placeholder="Confirm password"
+          autocomplete="new-password"
         >
 
         <button
+          id="registerButton"
           class="main-btn"
           onclick="register()"
         >
@@ -257,15 +282,15 @@
         </button>
 
         <div class="pending">
-          New accounts require admin approval
-          before entering the private NØV3X clan.
+          New accounts require NØV3X admin approval
+          before they can enter the private clan.
         </div>
 
       </div>
 
 
       <div class="small">
-        NØV3X COMS is a private clan communication system.
+        NØV3X COMS • PRIVATE CLAN SYSTEM
       </div>
 
     </div>
@@ -285,7 +310,7 @@
   <script>
 
     /* =========================
-       TABS
+       SWITCH LOGIN / REGISTER
     ========================= */
 
     function showLogin() {
@@ -303,7 +328,6 @@
         .classList.remove("active");
 
       clearMessage();
-
     }
 
 
@@ -322,12 +346,11 @@
         .classList.add("active");
 
       clearMessage();
-
     }
 
 
     /* =========================
-       MESSAGE
+       MESSAGES
     ========================= */
 
     function showMessage(text, type) {
@@ -363,11 +386,15 @@
 
       const email =
         document.getElementById("loginEmail")
-          .value.trim();
+          .value
+          .trim();
 
       const password =
         document.getElementById("loginPassword")
           .value;
+
+      const button =
+        document.getElementById("loginButton");
 
 
       if (!email || !password) {
@@ -379,6 +406,10 @@
 
         return;
       }
+
+
+      button.classList.add("loading");
+      button.textContent = "LOGGING IN...";
 
 
       try {
@@ -399,12 +430,15 @@
 
         if (!userDoc.exists) {
 
+          await auth.signOut();
+
           showMessage(
             "Your account profile was not found.",
             "error"
           );
 
-          await auth.signOut();
+          button.classList.remove("loading");
+          button.textContent = "LOGIN";
 
           return;
         }
@@ -414,21 +448,7 @@
           userDoc.data();
 
 
-        /* ADMIN */
-
-        if (
-          data.role === "admin" &&
-          data.approved === true
-        ) {
-
-          window.location.href =
-            "home.html";
-
-          return;
-        }
-
-
-        /* APPROVED MEMBER */
+        /* APPROVED ACCOUNT */
 
         if (data.approved === true) {
 
@@ -439,25 +459,29 @@
         }
 
 
-        /* PENDING MEMBER */
-
-        showMessage(
-          "Your account is waiting for NØV3X admin approval.",
-          "error"
-        );
+        /* NOT APPROVED */
 
         await auth.signOut();
+
+        window.location.href =
+          "pending.html";
 
       }
 
       catch (error) {
 
-        console.error(error);
+        console.error(
+          "Login error:",
+          error
+        );
 
         showMessage(
           getFirebaseError(error),
           "error"
         );
+
+        button.classList.remove("loading");
+        button.textContent = "LOGIN";
 
       }
 
@@ -472,11 +496,13 @@
 
       const username =
         document.getElementById("registerUsername")
-          .value.trim();
+          .value
+          .trim();
 
       const email =
         document.getElementById("registerEmail")
-          .value.trim();
+          .value
+          .trim();
 
       const password =
         document.getElementById("registerPassword")
@@ -486,11 +512,32 @@
         document.getElementById("registerConfirm")
           .value;
 
+      const button =
+        document.getElementById("registerButton");
 
-      if (!username || !email || !password || !confirm) {
+
+      /* VALIDATION */
+
+      if (
+        !username ||
+        !email ||
+        !password ||
+        !confirm
+      ) {
 
         showMessage(
           "Complete all fields.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      if (username.length < 3) {
+
+        showMessage(
+          "Username must be at least 3 characters.",
           "error"
         );
 
@@ -520,7 +567,15 @@
       }
 
 
+      button.classList.add("loading");
+      button.textContent = "SUBMITTING...";
+
+
       try {
+
+        /*
+          Create Firebase Authentication account.
+        */
 
         const result =
           await auth.createUserWithEmailAndPassword(
@@ -530,14 +585,15 @@
 
 
         /*
-          IMPORTANT:
-          Every new account starts as:
+          IMPORTANT SECURITY SETUP
 
-          role = member
+          New accounts ALWAYS start as:
+
+          role     = member
           approved = false
 
-          The user cannot make themselves
-          an admin.
+          The person registering cannot
+          choose their own admin role.
         */
 
         await db
@@ -559,37 +615,37 @@
           });
 
 
+        /*
+          Sign them out immediately.
+        */
+
         await auth.signOut();
 
 
-        showMessage(
-          "Membership request submitted. An NØV3X admin must approve your account.",
-          "success"
-        );
+        /*
+          Send them to the waiting page.
+        */
 
-
-        document.getElementById("registerUsername")
-          .value = "";
-
-        document.getElementById("registerEmail")
-          .value = "";
-
-        document.getElementById("registerPassword")
-          .value = "";
-
-        document.getElementById("registerConfirm")
-          .value = "";
+        window.location.href =
+          "pending.html";
 
       }
 
       catch (error) {
 
-        console.error(error);
+        console.error(
+          "Registration error:",
+          error
+        );
 
         showMessage(
           getFirebaseError(error),
           "error"
         );
+
+        button.classList.remove("loading");
+        button.textContent =
+          "REQUEST MEMBERSHIP";
 
       }
 
@@ -597,7 +653,7 @@
 
 
     /* =========================
-       FIREBASE ERROR MESSAGE
+       FIREBASE ERROR MESSAGES
     ========================= */
 
     function getFirebaseError(error) {
@@ -611,13 +667,20 @@
           return "Enter a valid email address.";
 
         case "auth/weak-password":
-          return "Password is too weak.";
+          return "Password must be at least 6 characters.";
 
         case "auth/invalid-credential":
           return "Incorrect email or password.";
 
+        case "auth/network-request-failed":
+          return "Network error. Check your connection.";
+
+        case "permission-denied":
+          return "Firebase permission denied.";
+
         default:
-          return error.message || "Something went wrong.";
+          return error.message ||
+            "Something went wrong.";
 
       }
 
