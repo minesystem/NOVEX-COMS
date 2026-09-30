@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOV3X COMS</title>
+</head>
+
+<body>
+
+  <h1>NOV3X COMS</h1>
+
+  <p id="welcome">Loading...</p>
+
+  <button onclick="logout()">LOGOUT</button>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <script src="firebase-config.js"></script>
+
+  <script>
+
+    auth.onAuthStateChanged(async (user) => {
+
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      const doc = await db
+        .collection("users")
+        .doc(user.uid)
+        .get();
+
+      if (doc.exists) {
+        document.getElementById("welcome").textContent =
+          "Welcome, " + doc.data().username + "!";
+      }
+
+    });
+
+
+    function logout() {
+      auth.signOut().then(() => {
+        window.location.href = "index.html";
+      });
+    }
+
+  </script>
+
+</body>
+</html>
