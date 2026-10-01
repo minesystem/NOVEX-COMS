@@ -20,7 +20,7 @@ body {
 header {
   padding: 18px;
   background: #140021;
-  border-bottom: 1px solid #7b2cff;
+  border-bottom: 1px solid #7627c9;
 }
 
 .logo {
@@ -47,7 +47,7 @@ header {
   border: 1px solid #6522a8;
   border-radius: 16px;
   padding: 20px;
-  box-shadow: 0 0 25px rgba(130, 40, 255, .15);
+  box-shadow: 0 0 25px rgba(130,40,255,.15);
 }
 
 h1 {
@@ -77,6 +77,11 @@ button {
   color: white;
 }
 
+.audio {
+  background: #54208c;
+  color: white;
+}
+
 .mute {
   background: #29202f;
   color: white;
@@ -88,11 +93,7 @@ button {
 }
 
 button:disabled {
-  opacity: .5;
-}
-
-.members {
-  margin-top: 20px;
+  opacity: .45;
 }
 
 .member {
@@ -103,8 +104,13 @@ button:disabled {
   border: 1px solid #352044;
 }
 
-.audio-container audio {
-  display: none;
+.connected {
+  color: #66ff99;
+}
+
+.audio-holder audio {
+  width: 100%;
+  margin-top: 10px;
 }
 </style>
 </head>
@@ -118,38 +124,41 @@ button:disabled {
 
 <div class="container">
 
-  <div class="voice-box">
+<div class="voice-box">
 
-    <h1>🔊 Clan Voice</h1>
+<h1>🔊 Clan Voice</h1>
 
-    <div id="status" class="status">
-      🔴 Not connected
-    </div>
+<div id="status" class="status">
+🔴 Not connected
+</div>
 
-    <button id="joinBtn" class="join">
-      🔊 JOIN VOICE
-    </button>
+<button id="joinBtn" class="join">
+🔊 JOIN VOICE
+</button>
 
-    <button id="muteBtn" class="mute" disabled>
-      🎤 MUTE
-    </button>
+<button id="audioBtn" class="audio" disabled>
+🔊 ENABLE AUDIO
+</button>
 
-    <button id="leaveBtn" class="leave" disabled>
-      🚪 LEAVE VOICE
-    </button>
+<button id="muteBtn" class="mute" disabled>
+🎤 MUTE
+</button>
 
-    <div class="members">
-      <h3>👥 In Voice</h3>
-      <div id="memberList">
-        Nobody is currently in voice.
-      </div>
-    </div>
+<button id="leaveBtn" class="leave" disabled>
+🚪 LEAVE VOICE
+</button>
 
-    <div id="audioContainer" class="audio-container"></div>
+<h3>👥 In Voice</h3>
 
-  </div>
+<div id="memberList">
+Nobody is currently in voice.
+</div>
+
+<div id="audioHolder" class="audio-holder"></div>
 
 </div>
+</div>
+
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -161,10 +170,11 @@ button:disabled {
 
 const statusBox = document.getElementById("status");
 const joinBtn = document.getElementById("joinBtn");
+const audioBtn = document.getElementById("audioBtn");
 const muteBtn = document.getElementById("muteBtn");
 const leaveBtn = document.getElementById("leaveBtn");
 const memberList = document.getElementById("memberList");
-const audioContainer = document.getElementById("audioContainer");
+const audioHolder = document.getElementById("audioHolder");
 
 let currentUser = null;
 let username = "";
@@ -173,26 +183,33 @@ let localStream = null;
 let joined = false;
 let muted = false;
 
-let sessionId = crypto.randomUUID();
+const sessionId =
+  crypto.randomUUID();
 
 const peers = {};
-const pendingCandidates = {};
+const memberData = {};
+const candidateQueues = {};
 const seenSignals = new Set();
 
 const rtcConfig = {
+
   iceServers: [
+
     {
       urls: "stun:stun.l.google.com:19302"
     },
+
     {
       urls: "stun:stun1.l.google.com:19302"
     }
+
   ]
+
 };
 
 
 /* =========================
-   AUTH CHECK
+   AUTH
 ========================= */
 
 auth.onAuthStateChanged(async user => {
@@ -204,24 +221,38 @@ auth.onAuthStateChanged(async user => {
 
   currentUser = user;
 
-  const doc = await db
-    .collection("users")
-    .doc(user.uid)
-    .get();
+  try {
 
-  if (!doc.exists || doc.data().approved !== true) {
-    await auth.signOut();
-    window.location.href = "index.html";
-    return;
+    const userDoc = await db
+      .collection("users")
+      .doc(user.uid)
+      .get();
+
+    if (!userDoc.exists ||
+        userDoc.data().approved !== true) {
+
+      await auth.signOut();
+      window.location.href = "index.html";
+      return;
+    }
+
+    username =
+      userDoc.data().username || "Member";
+
+  } catch (error) {
+
+    console.error(error);
+
+    statusBox.innerHTML =
+      "❌ Failed to load account.";
+
   }
-
-  username = doc.data().username || "Member";
 
 });
 
 
 /* =========================
-   JOIN VOICE
+   JOIN
 ========================= */
 
 joinBtn.onclick = async () => {
@@ -230,104 +261,172 @@ joinBtn.onclick = async () => {
 
   try {
 
-    statusBox.innerHTML = "🎤 Requesting microphone...";
+    statusBox.innerHTML =
+      "🎤 Requesting microphone...";
 
-    localStream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true
-      },
-      video: false
-    });
+    localStream =
+      await navigator.mediaDevices.getUserMedia({
+
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        },
+
+        video: false
+
+      });
+
 
     joined = true;
+
 
     await db
       .collection("voiceRoom")
       .doc(currentUser.uid)
       .set({
+
         uid: currentUser.uid,
+
         username: username,
+
         sessionId: sessionId,
+
         muted: false,
-        joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+
+        joinedAt:
+          firebase.firestore.FieldValue.serverTimestamp()
+
       });
 
+
     joinBtn.disabled = true;
+    audioBtn.disabled = false;
     muteBtn.disabled = false;
     leaveBtn.disabled = false;
 
-    statusBox.innerHTML =
-      "🟢 Connected to NØV3X Clan Voice";
 
-    listenForMembers();
-    listenForSignals();
+    statusBox.innerHTML =
+      "🟢 You are connected to Clan Voice";
+
+    statusBox.classList.add("connected");
+
+
+    startMemberListener();
+    startSignalListener();
+
 
   } catch (error) {
 
     console.error(error);
 
     statusBox.innerHTML =
-      "❌ Microphone connection failed: " +
+      "❌ Microphone failed: " +
       error.message;
+
   }
+
 };
 
 
 /* =========================
-   MEMBER LIST
+   MEMBER LISTENER
 ========================= */
 
-function listenForMembers() {
+function startMemberListener() {
 
   db.collection("voiceRoom")
-    .onSnapshot(snapshot => {
+    .onSnapshot(async snapshot => {
 
-      const members = [];
+      const activeMembers = {};
 
       snapshot.forEach(doc => {
+
         const data = doc.data();
 
-        if (data.uid !== currentUser.uid) {
-          members.push(data);
+        if (data.uid === currentUser.uid) {
+          return;
         }
+
+        activeMembers[data.uid] = data;
+
       });
 
-      if (members.length === 0) {
+
+      /* Save member information */
+
+      Object.keys(activeMembers).forEach(uid => {
+
+        memberData[uid] =
+          activeMembers[uid];
+
+      });
+
+
+      /* Display members */
+
+      const ids =
+        Object.keys(activeMembers);
+
+
+      if (ids.length === 0) {
 
         memberList.innerHTML =
           "Nobody else is currently in voice.";
 
       } else {
 
-        memberList.innerHTML = members.map(member => {
+        memberList.innerHTML =
+          ids.map(uid => {
 
-          return `
-            <div class="member">
-              🎤 ${escapeHtml(member.username)}
-            </div>
-          `;
+            const member =
+              activeMembers[uid];
 
-        }).join("");
+            return `
+              <div class="member">
+                🎤 ${escapeHtml(member.username)}
+                ${member.muted ? " 🔇" : ""}
+              </div>
+            `;
+
+          }).join("");
 
       }
 
-      /*
-       Create connections with every other
-       member currently inside the room.
-      */
 
-      members.forEach(member => {
+      /* Create/remove connections */
 
-        if (!peers[member.uid]) {
+      ids.forEach(uid => {
 
-          const shouldCall =
-            currentUser.uid < member.uid;
+        const member =
+          activeMembers[uid];
 
-          if (shouldCall) {
+        if (!peers[uid]) {
+
+          /*
+            Lower UID is the caller.
+            Higher UID waits for the offer.
+          */
+
+          if (currentUser.uid < uid) {
+
             createOffer(member);
+
           }
+
+        }
+
+      });
+
+
+      /* Close peers for members who left */
+
+      Object.keys(peers).forEach(uid => {
+
+        if (!activeMembers[uid]) {
+
+          closePeer(uid);
+
         }
 
       });
@@ -347,23 +446,31 @@ function createPeer(member) {
     return peers[member.uid];
   }
 
-  const pc = new RTCPeerConnection(rtcConfig);
+
+  const pc =
+    new RTCPeerConnection(rtcConfig);
+
 
   peers[member.uid] = pc;
 
-  pendingCandidates[member.uid] =
-    pendingCandidates[member.uid] || [];
+  candidateQueues[member.uid] =
+    candidateQueues[member.uid] || [];
 
 
-  /* Local audio */
+  /* Add microphone */
 
   if (localStream) {
 
-    localStream.getTracks().forEach(track => {
+    localStream
+      .getTracks()
+      .forEach(track => {
 
-      pc.addTrack(track, localStream);
+        pc.addTrack(
+          track,
+          localStream
+        );
 
-    });
+      });
 
   }
 
@@ -372,50 +479,109 @@ function createPeer(member) {
 
   pc.ontrack = event => {
 
+    console.log(
+      "🔊 Remote audio received from",
+      member.username
+    );
+
+
     let audio =
-      document.getElementById("audio-" + member.uid);
+      document.getElementById(
+        "audio-" + member.uid
+      );
+
 
     if (!audio) {
 
-      audio = document.createElement("audio");
+      audio =
+        document.createElement("audio");
 
-      audio.id = "audio-" + member.uid;
+      audio.id =
+        "audio-" + member.uid;
 
       audio.autoplay = true;
       audio.playsInline = true;
 
-      audioContainer.appendChild(audio);
+      audio.setAttribute(
+        "controls",
+        "false"
+      );
+
+      audioHolder.appendChild(audio);
+
     }
 
-    audio.srcObject = event.streams[0];
 
-    audio.play().catch(() => {});
+    audio.srcObject =
+      event.streams[0];
+
+
+    audio.play()
+      .then(() => {
+
+        console.log(
+          "🔊 Audio playing:",
+          member.username
+        );
+
+      })
+      .catch(error => {
+
+        console.log(
+          "Audio autoplay blocked:",
+          error
+        );
+
+      });
+
   };
 
 
-  /* ICE candidates */
+  /* ICE */
 
   pc.onicecandidate = async event => {
 
-    if (!event.candidate) return;
+    if (!event.candidate) {
+      return;
+    }
 
-    await db.collection("voiceSignals").add({
 
-      roomId: "main",
+    try {
 
-      from: currentUser.uid,
-      to: member.uid,
+      await db
+        .collection("voiceSignals")
+        .add({
 
-      type: "candidate",
+          roomId: "main",
 
-      candidate: event.candidate.toJSON(),
+          from: currentUser.uid,
 
-      sessionId: sessionId,
+          to: member.uid,
 
-      createdAt:
-        firebase.firestore.FieldValue.serverTimestamp()
+          toSessionId:
+            member.sessionId,
 
-    });
+          type: "candidate",
+
+          candidate:
+            event.candidate.toJSON(),
+
+          sessionId:
+            sessionId,
+
+          createdAt:
+            firebase.firestore.FieldValue.serverTimestamp()
+
+        });
+
+    } catch (error) {
+
+      console.error(
+        "ICE send error:",
+        error
+      );
+
+    }
 
   };
 
@@ -423,56 +589,108 @@ function createPeer(member) {
   pc.onconnectionstatechange = () => {
 
     console.log(
-      "Voice connection:",
+      "Connection",
       member.username,
       pc.connectionState
     );
+
+
+    if (
+      pc.connectionState ===
+      "connected"
+    ) {
+
+      statusBox.innerHTML =
+        "🟢 Live voice connected";
+
+    }
+
+
+    if (
+      pc.connectionState ===
+      "failed"
+    ) {
+
+      console.log(
+        "Connection failed with",
+        member.username
+      );
+
+    }
 
   };
 
 
   return pc;
+
 }
 
 
 /* =========================
-   CREATE OFFER
+   OFFER
 ========================= */
 
 async function createOffer(member) {
 
   try {
 
-    const pc = createPeer(member);
+    const pc =
+      createPeer(member);
 
-    if (pc.signalingState !== "stable") {
+
+    if (
+      pc.signalingState !==
+      "stable"
+    ) {
       return;
     }
 
-    const offer = await pc.createOffer();
 
-    await pc.setLocalDescription(offer);
+    const offer =
+      await pc.createOffer();
 
-    await db.collection("voiceSignals").add({
 
-      roomId: "main",
+    await pc.setLocalDescription(
+      offer
+    );
 
-      from: currentUser.uid,
-      to: member.uid,
 
-      type: "offer",
+    await db
+      .collection("voiceSignals")
+      .add({
 
-      sdp: {
-        type: offer.type,
-        sdp: offer.sdp
-      },
+        roomId: "main",
 
-      sessionId: sessionId,
+        from: currentUser.uid,
 
-      createdAt:
-        firebase.firestore.FieldValue.serverTimestamp()
+        to: member.uid,
 
-    });
+        toSessionId:
+          member.sessionId,
+
+        type: "offer",
+
+        sdp: {
+
+          type: offer.type,
+
+          sdp: offer.sdp
+
+        },
+
+        sessionId:
+          sessionId,
+
+        createdAt:
+          firebase.firestore.FieldValue.serverTimestamp()
+
+      });
+
+
+    console.log(
+      "📡 Offer sent to",
+      member.username
+    );
 
   } catch (error) {
 
@@ -490,33 +708,77 @@ async function createOffer(member) {
    SIGNAL LISTENER
 ========================= */
 
-function listenForSignals() {
+function startSignalListener() {
 
   db.collection("voiceSignals")
-    .where("to", "==", currentUser.uid)
+    .where(
+      "to",
+      "==",
+      currentUser.uid
+    )
     .onSnapshot(async snapshot => {
 
-      for (const change of snapshot.docChanges()) {
+      for (
+        const change of snapshot.docChanges()
+      ) {
 
         if (change.type !== "added") {
           continue;
         }
 
-        const signalId = change.doc.id;
 
-        if (seenSignals.has(signalId)) {
+        const signalId =
+          change.doc.id;
+
+
+        if (
+          seenSignals.has(signalId)
+        ) {
           continue;
         }
+
 
         seenSignals.add(signalId);
 
-        const signal = change.doc.data();
 
-        if (signal.roomId !== "main") {
+        const signal =
+          change.doc.data();
+
+
+        if (
+          signal.roomId !== "main"
+        ) {
           continue;
         }
 
+
+        /*
+          Only accept signals meant
+          for this exact login session.
+        */
+
+        if (
+          signal.toSessionId &&
+          signal.toSessionId !== sessionId
+        ) {
+          continue;
+        }
+
+
+        /*
+          Ignore our own signals.
+        */
+
+        if (
+          signal.from ===
+          currentUser.uid
+        ) {
+          continue;
+        }
+
+
         await handleSignal(signal);
+
       }
 
     });
@@ -530,103 +792,178 @@ function listenForSignals() {
 
 async function handleSignal(signal) {
 
-  if (!joined) return;
+  const sender =
+    signal.from;
 
-  const sender = signal.from;
-
-  /*
-   Ignore our own old session signals.
-  */
-
-  if (!sender || sender === currentUser.uid) {
-    return;
-  }
 
   try {
 
-    let memberData = {
-      uid: sender,
-      username: "NØV3X Member"
-    };
+    let member =
+      memberData[sender];
 
-    const memberDoc =
-      await db.collection("voiceRoom")
-        .doc(sender)
-        .get();
 
-    if (memberDoc.exists) {
-      memberData = memberDoc.data();
+    if (!member) {
+
+      const doc =
+        await db
+          .collection("voiceRoom")
+          .doc(sender)
+          .get();
+
+
+      if (!doc.exists) {
+        return;
+      }
+
+
+      member =
+        doc.data();
+
+      memberData[sender] =
+        member;
+
     }
 
-    const pc = createPeer(memberData);
+
+    const pc =
+      createPeer(member);
 
 
     /* OFFER */
 
-    if (signal.type === "offer") {
+    if (
+      signal.type ===
+      "offer"
+    ) {
+
+      console.log(
+        "📡 Offer received"
+      );
+
 
       await pc.setRemoteDescription(
-        new RTCSessionDescription(signal.sdp)
+        new RTCSessionDescription(
+          signal.sdp
+        )
       );
+
+
+      await flushCandidates(
+        sender
+      );
+
 
       const answer =
         await pc.createAnswer();
 
-      await pc.setLocalDescription(answer);
 
-      await db.collection("voiceSignals").add({
+      await pc.setLocalDescription(
+        answer
+      );
 
-        roomId: "main",
 
-        from: currentUser.uid,
-        to: sender,
+      await db
+        .collection("voiceSignals")
+        .add({
 
-        type: "answer",
+          roomId: "main",
 
-        sdp: {
-          type: answer.type,
-          sdp: answer.sdp
-        },
+          from:
+            currentUser.uid,
 
-        sessionId: sessionId,
+          to:
+            sender,
 
-        createdAt:
-          firebase.firestore.FieldValue.serverTimestamp()
+          toSessionId:
+            member.sessionId,
 
-      });
+          type:
+            "answer",
 
-      await flushCandidates(sender);
+          sdp: {
+
+            type:
+              answer.type,
+
+            sdp:
+              answer.sdp
+
+          },
+
+          sessionId:
+            sessionId,
+
+          createdAt:
+            firebase.firestore.FieldValue.serverTimestamp()
+
+        });
+
+
+      console.log(
+        "📡 Answer sent"
+      );
 
     }
 
 
     /* ANSWER */
 
-    else if (signal.type === "answer") {
+    else if (
+      signal.type ===
+      "answer"
+    ) {
 
-      await pc.setRemoteDescription(
-        new RTCSessionDescription(signal.sdp)
+      console.log(
+        "📡 Answer received"
       );
 
-      await flushCandidates(sender);
+
+      if (
+        pc.signalingState ===
+        "have-local-offer"
+      ) {
+
+        await pc.setRemoteDescription(
+          new RTCSessionDescription(
+            signal.sdp
+          )
+        );
+
+
+        await flushCandidates(
+          sender
+        );
+
+      }
 
     }
 
 
-    /* ICE CANDIDATE */
+    /* ICE */
 
-    else if (signal.type === "candidate") {
+    else if (
+      signal.type ===
+      "candidate"
+    ) {
 
       const candidate =
-        new RTCIceCandidate(signal.candidate);
+        new RTCIceCandidate(
+          signal.candidate
+        );
 
-      if (pc.remoteDescription) {
 
-        await pc.addIceCandidate(candidate);
+      if (
+        pc.remoteDescription
+      ) {
+
+        await pc.addIceCandidate(
+          candidate
+        );
 
       } else {
 
-        pendingCandidates[sender].push(candidate);
+        candidateQueues[sender]
+          .push(candidate);
 
       }
 
@@ -635,7 +972,7 @@ async function handleSignal(signal) {
   } catch (error) {
 
     console.error(
-      "Signal error:",
+      "Signal handling error:",
       error
     );
 
@@ -645,31 +982,42 @@ async function handleSignal(signal) {
 
 
 /* =========================
-   FLUSH ICE
+   ICE QUEUE
 ========================= */
 
 async function flushCandidates(uid) {
 
-  const pc = peers[uid];
+  const pc =
+    peers[uid];
 
-  if (!pc) return;
+
+  if (!pc) {
+    return;
+  }
+
 
   const queue =
-    pendingCandidates[uid] || [];
+    candidateQueues[uid] || [];
 
-  while (queue.length) {
+
+  while (
+    queue.length > 0
+  ) {
 
     const candidate =
       queue.shift();
 
+
     try {
 
-      await pc.addIceCandidate(candidate);
+      await pc.addIceCandidate(
+        candidate
+      );
 
     } catch (error) {
 
       console.error(
-        "ICE error:",
+        "ICE candidate error:",
         error
       );
 
@@ -681,86 +1029,178 @@ async function flushCandidates(uid) {
 
 
 /* =========================
+   ENABLE AUDIO
+========================= */
+
+audioBtn.onclick = async () => {
+
+  const audios =
+    audioHolder.querySelectorAll(
+      "audio"
+    );
+
+
+  for (
+    const audio of audios
+  ) {
+
+    try {
+
+      await audio.play();
+
+    } catch (error) {
+
+      console.log(
+        "Could not play audio",
+        error
+      );
+
+    }
+
+  }
+
+
+  statusBox.innerHTML =
+    "🔊 Remote audio enabled";
+
+};
+
+
+/* =========================
    MUTE
 ========================= */
 
 muteBtn.onclick = async () => {
 
-  if (!localStream) return;
+  if (!localStream) {
+    return;
+  }
 
-  muted = !muted;
+
+  muted =
+    !muted;
+
 
   localStream
     .getAudioTracks()
     .forEach(track => {
-      track.enabled = !muted;
+
+      track.enabled =
+        !muted;
+
     });
+
 
   muteBtn.innerHTML =
-    muted ? "🔇 UNMUTE" : "🎤 MUTE";
+    muted
+      ? "🔇 UNMUTE"
+      : "🎤 MUTE";
 
-  await db.collection("voiceRoom")
-    .doc(currentUser.uid)
-    .update({
-      muted: muted
-    });
+
+  try {
+
+    await db
+      .collection("voiceRoom")
+      .doc(currentUser.uid)
+      .update({
+
+        muted:
+          muted
+
+      });
+
+  } catch (error) {
+
+    console.error(error);
+
+  }
 
 };
+
+
+/* =========================
+   CLOSE PEER
+========================= */
+
+function closePeer(uid) {
+
+  const pc =
+    peers[uid];
+
+
+  if (pc) {
+
+    try {
+      pc.close();
+    } catch (e) {}
+
+  }
+
+
+  delete peers[uid];
+  delete candidateQueues[uid];
+  delete memberData[uid];
+
+
+  const audio =
+    document.getElementById(
+      "audio-" + uid
+    );
+
+
+  if (audio) {
+    audio.remove();
+  }
+
+}
 
 
 /* =========================
    LEAVE
 ========================= */
 
-leaveBtn.onclick = async () => {
+leaveBtn.onclick =
+  async () => {
 
-  await leaveVoice();
+    await leaveVoice();
 
-};
+  };
 
 
 async function leaveVoice() {
 
   joined = false;
 
+
   if (localStream) {
 
-    localStream.getTracks().forEach(track => {
-      track.stop();
-    });
+    localStream
+      .getTracks()
+      .forEach(track => {
+
+        track.stop();
+
+      });
 
     localStream = null;
+
   }
 
 
-  Object.values(peers).forEach(pc => {
+  Object.keys(peers)
+    .forEach(uid => {
 
-    try {
-      pc.close();
-    } catch (e) {}
+      closePeer(uid);
 
-  });
-
-
-  Object.keys(peers).forEach(uid => {
-
-    delete peers[uid];
-
-    const audio =
-      document.getElementById("audio-" + uid);
-
-    if (audio) {
-      audio.remove();
-    }
-
-  });
+    });
 
 
   if (currentUser) {
 
     try {
 
-      await db.collection("voiceRoom")
+      await db
+        .collection("voiceRoom")
         .doc(currentUser.uid)
         .delete();
 
@@ -774,10 +1214,19 @@ async function leaveVoice() {
 
 
   joinBtn.disabled = false;
+  audioBtn.disabled = true;
   muteBtn.disabled = true;
   leaveBtn.disabled = true;
 
-  muteBtn.innerHTML = "🎤 MUTE";
+
+  muteBtn.innerHTML =
+    "🎤 MUTE";
+
+
+  statusBox.classList.remove(
+    "connected"
+  );
+
 
   statusBox.innerHTML =
     "🔴 You left Clan Voice";
@@ -795,9 +1244,13 @@ window.addEventListener(
 
     if (localStream) {
 
-      localStream.getTracks().forEach(track => {
-        track.stop();
-      });
+      localStream
+        .getTracks()
+        .forEach(track => {
+
+          track.stop();
+
+        });
 
     }
 
@@ -806,17 +1259,32 @@ window.addEventListener(
 
 
 /* =========================
-   HTML ESCAPE
+   ESCAPE HTML
 ========================= */
 
 function escapeHtml(text) {
 
   return String(text)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
 
 }
 
